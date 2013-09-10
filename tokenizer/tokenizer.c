@@ -3,6 +3,7 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 /*
  * Tokenizer type.  You need to fill in the type as part of your implementation.
@@ -37,7 +38,8 @@ int isInDelims(char * delims, char letter);
 
 TokenizerT *TKCreate(char *separators, char *ts) {
   char *next;
-  TokenizerT *tokenStruct;
+  TokenizerT *tokenStruct = (TokenizerT*)
+    malloc(sizeof(TokenizerT));
   tokenStruct->current = 0;
   tokenStruct->delims = separators;
   tokenStruct->inputString = ts;
@@ -45,7 +47,6 @@ TokenizerT *TKCreate(char *separators, char *ts) {
   while((next = TKGetNextToken(tokenStruct)) != 0) {
     printf("%s\n", next);
   }
-
 
   return NULL;
 }
@@ -79,7 +80,14 @@ char *TKGetNextToken(TokenizerT *tk) {
   while(!isInDelims(tk->delims, tk->inputString[current])) {
     current++;
   }
-
+  if(current > start) {
+    char * newTok = malloc(current - start);
+    return strncpy(newTok, tk->inputString, current);
+    tk->current = current;
+  }
+  else {
+    return 0;
+  }
 
   return NULL;
 }
@@ -88,7 +96,7 @@ int isInDelims(char * delims, char letter)
 {
   int i = 0;
   for(i = 0; i < strlen(delims); i++) {
-    if(delims[i] == letter) {
+    if(delims[i] == letter || delims[i] == '\0') {
       return 1;
     }
     return 0;
