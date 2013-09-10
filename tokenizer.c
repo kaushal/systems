@@ -2,6 +2,7 @@
  * tokenizer.c
  */
 #include <stdio.h>
+#include <string.h>
 
 /*
  * Tokenizer type.  You need to fill in the type as part of your implementation.
@@ -18,6 +19,7 @@ struct TokenizerT_ {
 typedef struct TokenizerT_ TokenizerT;
 
 char *TKGetNextToken(TokenizerT *tk);
+int isInDelims(char * delims, char letter);
 
 /*
  * TKCreate creates a new TokenizerT object for a given set of separator
@@ -70,9 +72,27 @@ void TKDestroy(TokenizerT *tk) {
  * You need to fill in this function as part of your implementation.
  */
 
+//TODO: two delims in a row
 char *TKGetNextToken(TokenizerT *tk) {
+  int start = tk->current;
+  int current= start;
+  while(!isInDelims(tk->delims, tk->inputString[current])) {
+    current++;
+  }
+
 
   return NULL;
+}
+
+int isInDelims(char * delims, char letter)
+{
+  int i = 0;
+  for(i = 0; i < strlen(delims); i++) {
+    if(delims[i] == letter) {
+      return 1;
+    }
+    return 0;
+  }
 }
 
 /*
