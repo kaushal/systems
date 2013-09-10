@@ -7,10 +7,17 @@
  * Tokenizer type.  You need to fill in the type as part of your implementation.
  */
 
+
 struct TokenizerT_ {
+  char ** brokenTokens;
+  char * inputString;
+  char * delims;
+  int current;
 };
 
 typedef struct TokenizerT_ TokenizerT;
+
+char *TKGetNextToken(TokenizerT *tk);
 
 /*
  * TKCreate creates a new TokenizerT object for a given set of separator
@@ -27,6 +34,16 @@ typedef struct TokenizerT_ TokenizerT;
  */
 
 TokenizerT *TKCreate(char *separators, char *ts) {
+  char *next;
+  TokenizerT *tokenStruct;
+  tokenStruct->current = 0;
+  tokenStruct->delims = separators;
+  tokenStruct->inputString = ts;
+
+  while((next = TKGetNextToken(tokenStruct)) != 0) {
+    printf("%s\n", next);
+  }
+
 
   return NULL;
 }
@@ -67,6 +84,10 @@ char *TKGetNextToken(TokenizerT *tk) {
  */
 
 int main(int argc, char **argv) {
+  char *delims =  argv[1];
+  char *tokens =  argv[2];
+
+  TKCreate(delims, tokens);
 
   return 0;
 };
