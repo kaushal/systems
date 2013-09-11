@@ -82,8 +82,8 @@ char *TKGetNextToken(TokenizerT *tk) {
   }
   if(current > start) {
     char * newTok = malloc(current - start);
-    return strncpy(newTok, tk->inputString, current);
     tk->current = current;
+    return strncpy(newTok, tk->inputString, current);
   }
   else {
     return 0;
