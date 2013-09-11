@@ -111,6 +111,7 @@ int isInDelims(char * delims, char letter)
  * Each token should be printed on a separate line.
  */
 
+//TODO check for the right number of command line args
 int main(int argc, char **argv) {
   char *delims =  argv[1];
   char *tokens =  argv[2];

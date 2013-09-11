@@ -1,0 +1,11 @@
+Delims || Input String
+-----------------------
+"?"      "this??string"
+"?"      "this string"
+"?"      "this?string?"
+"?"      "this??string?"
+"?"      "?"
+"?/"      "this?/string?"
+"?/"      "this?/string?/"
+""        "this string"
+
