@@ -91,14 +91,10 @@ char *TKGetNextToken(TokenizerT *tk) {
     current++;
   }
   if(current > start) {
-    char * newTok = calloc(current - start, sizeof(char));
     tk->current = current;
-    char * temp = strncpy(newTok, tk->inputString, current);
-
     const char* from = tk->inputString;
     char *to = (char*) malloc(current-start);
     char * temp2 = strncpy(to, from + start, current - start);
-    free(newTok);
     return temp2;
   }
   else {
