@@ -124,11 +124,17 @@ int isInDelims(char * delims, char letter)
 //TODO check for the right number of command line args
 int main(int argc, char **argv)
 {
+  //Program needs three arguments to run
   if(argc != 3) {
-    printf("Need three arguments\n");
+    printf("Need two arguments.\n");
     return 1;
   }
 
+  //Arguments must not be empty
+  if(!strlen(argv[1]) || !strlen(argv[2])) {
+    printf("Empty argument detected.\n");
+    return 1;
+  }
   char *delims =  argv[1];
   char *tokens =  argv[2];
 

@@ -9,3 +9,7 @@ Delims || Input String
 "?/"      "this?/string?/"
 ""        "this string"
 
+./a.out  shvass
+./a.out /? sh?ass/
+./a.out ? ?
+./a.out ? ??
