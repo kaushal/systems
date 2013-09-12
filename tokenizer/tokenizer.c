@@ -77,6 +77,9 @@ void TKDestroy(TokenizerT *tk) {
 char *TKGetNextToken(TokenizerT *tk) {
   int start = tk->current;
   int current= start;
+  if(tk->inputString[current] == '\0'){
+      return 0;
+  }
   if(isInDelims(tk->delims, tk->inputString[current])){
     while(isInDelims(tk->delims, tk->inputString[current])){
       current++;
@@ -91,8 +94,12 @@ char *TKGetNextToken(TokenizerT *tk) {
     char * newTok = calloc(current - start, sizeof(char));
     tk->current = current;
     char * temp = strncpy(newTok, tk->inputString, current);
+
+    const char* from = tk->inputString;
+    char *to = (char*) malloc(current-start);
+    char * temp2 = strncpy(to, from + start, current - start);
     free(newTok);
-    return temp;
+    return temp2;
   }
   else {
     return 0;
