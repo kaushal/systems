@@ -102,7 +102,7 @@ int isInDelims(char * delims, char letter)
 {
   int i = 0;
   for(i = 0; i < strlen(delims); i++) {
-    if(delims[i] == letter || delims[i] == '\0') {
+    if(delims[i] == letter || letter == '\0') {
       return 1;
     }
   }
