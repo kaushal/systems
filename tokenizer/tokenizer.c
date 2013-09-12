@@ -77,6 +77,13 @@ void TKDestroy(TokenizerT *tk) {
 char *TKGetNextToken(TokenizerT *tk) {
   int start = tk->current;
   int current= start;
+  if(isInDelims(tk->delims, tk->delims[current])){
+    while(isInDelims(tk->delims, tk->delims[current])){
+      current++;
+    }
+  }
+  start = current - 1;
+
   while(!isInDelims(tk->delims, tk->inputString[current])) {
     current++;
   }
@@ -88,8 +95,6 @@ char *TKGetNextToken(TokenizerT *tk) {
   else {
     return 0;
   }
-
-  return NULL;
 }
 
 int isInDelims(char * delims, char letter)
@@ -99,8 +104,8 @@ int isInDelims(char * delims, char letter)
     if(delims[i] == letter || delims[i] == '\0') {
       return 1;
     }
-    return 0;
   }
+  return 0;
 }
 
 /*
