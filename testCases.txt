@@ -13,3 +13,20 @@ Delims || Input String
 ./a.out /? sh?ass/
 ./a.out ? ?
 ./a.out ? ??
+
+Valid escape characters:
+\n
+\t
+\b
+\v
+\r
+\f
+\\
+\a
+\"
+
+Not Valid test characters:
+\000
+\xhh
+\'
+\?

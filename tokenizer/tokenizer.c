@@ -44,10 +44,12 @@ TokenizerT *TKCreate(char *separators, char *ts) {
   tokenStruct->delims = separators;
   tokenStruct->inputString = ts;
 
+  //TODO Maybe don't print these -- populate array instead
   while((next = TKGetNextToken(tokenStruct)) != 0) {
     printf("%s\n", next);
   }
 
+  //TODO function must return Tokenizert
   return NULL;
 }
 
@@ -59,6 +61,9 @@ TokenizerT *TKCreate(char *separators, char *ts) {
  */
 
 void TKDestroy(TokenizerT *tk) {
+  free(tk->brokenTokens);
+  free(tk->inputString);
+  free(tk->delims);
 }
 
 /*
@@ -74,6 +79,7 @@ void TKDestroy(TokenizerT *tk) {
  */
 
 //TODO: two delims in a row
+//TODO: special characters
 char *TKGetNextToken(TokenizerT *tk) {
   int start = tk->current;
   int current= start;
@@ -121,7 +127,6 @@ int isInDelims(char * delims, char letter)
  * Each token should be printed on a separate line.
  */
 
-//TODO check for the right number of command line args
 int main(int argc, char **argv)
 {
   //Program needs three arguments to run
@@ -138,7 +143,8 @@ int main(int argc, char **argv)
   char *delims =  argv[1];
   char *tokens =  argv[2];
 
-  TKCreate(delims, tokens);
+  TokenizerT *tk = TKCreate(delims, tokens);
+  TKDestroy(tk);
 
   return 0;
 };
