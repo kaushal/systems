@@ -15,7 +15,7 @@ struct Node_ {
 };
 
 struct TokenizerT_ {
-  struct Node_ head;
+  struct Node_ * head;
   char * inputString;
   char * delims;
   int current;
@@ -44,16 +44,28 @@ int isInDelims(char * delims, char letter);
 TokenizerT *TKCreate(char *separators, char *ts) {
   char *currToken;
   Node * newNode;
+  Node * tempNode;
   TokenizerT *tokenStruct = (TokenizerT*)
     malloc(sizeof(TokenizerT));
   tokenStruct->current = 0;
   tokenStruct->delims = separators;
   tokenStruct->inputString = ts;
+  tokenStruct->head = NULL;
   while((currToken = TKGetNextToken(tokenStruct)) != 0) {
     newNode = malloc(sizeof(Node));
     newNode->data = currToken;
     newNode->next = NULL;
-    //printf("%s\n", next);
+    tempNode = tokenStruct->head;
+    if(tempNode == NULL){
+        tokenStruct->head = newNode;
+    }
+    else{
+        while(tempNode->next != NULL){
+            tempNode = tempNode->next;
+        }
+        tempNode->next=newNode;
+    }
+    printf("%s\n", currToken);
   }
 
   return tokenStruct;
