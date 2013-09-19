@@ -9,14 +9,19 @@
  * Tokenizer type.  You need to fill in the type as part of your implementation.
  */
 
+struct Node_ {
+  char * data;
+  struct Node_ * next;
+};
 
 struct TokenizerT_ {
-  char ** brokenTokens;
+  struct Node_ head;
   char * inputString;
   char * delims;
   int current;
 };
 
+typedef struct Node_ Node;
 typedef struct TokenizerT_ TokenizerT;
 
 char *TKGetNextToken(TokenizerT *tk);
@@ -37,20 +42,22 @@ int isInDelims(char * delims, char letter);
  */
 
 TokenizerT *TKCreate(char *separators, char *ts) {
-  char *next;
+  char *currToken;
+  Node * newNode;
   TokenizerT *tokenStruct = (TokenizerT*)
     malloc(sizeof(TokenizerT));
   tokenStruct->current = 0;
   tokenStruct->delims = separators;
   tokenStruct->inputString = ts;
-
-  //TODO Maybe don't print these -- populate array instead
-  while((next = TKGetNextToken(tokenStruct)) != 0) {
-    printf("%s\n", next);
+  while((currToken = TKGetNextToken(tokenStruct)) != 0) {
+    newNode = malloc(sizeof(Node));
+    newNode->data = currToken;
+    newNode->next = NULL;
+    //printf("%s\n", next);
   }
 
-  //TODO function must return Tokenizert
   return tokenStruct;
+  //TODO function must return NULL otherwise
 }
 
 /*
