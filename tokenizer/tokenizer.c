@@ -50,7 +50,7 @@ TokenizerT *TKCreate(char *separators, char *ts) {
   }
 
   //TODO function must return Tokenizert
-  return NULL;
+  return tokenStruct;
 }
 
 /*
@@ -61,9 +61,7 @@ TokenizerT *TKCreate(char *separators, char *ts) {
  */
 
 void TKDestroy(TokenizerT *tk) {
-  //free(tk->brokenTokens);
-  free(tk->inputString);
-  free(tk->delims);
+  free(tk);
 }
 
 /*
@@ -147,7 +145,7 @@ int main(int argc, char **argv)
   char *tokens =  argv[2];
 
   TokenizerT *tk = TKCreate(delims, tokens);
-  //TKDestroy(tk);
+  TKDestroy(tk);
 
   return 0;
 };
