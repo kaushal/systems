@@ -61,7 +61,7 @@ TokenizerT *TKCreate(char *separators, char *ts) {
  */
 
 void TKDestroy(TokenizerT *tk) {
-  free(tk->brokenTokens);
+  //free(tk->brokenTokens);
   free(tk->inputString);
   free(tk->delims);
 }
@@ -86,6 +86,7 @@ char *TKGetNextToken(TokenizerT *tk) {
   if(tk->inputString[current] == '\0'){
       return 0;
   }
+  //go past everything in delims
   if(isInDelims(tk->delims, tk->inputString[current])){
     while(isInDelims(tk->delims, tk->inputString[current])){
       current++;
@@ -93,6 +94,7 @@ char *TKGetNextToken(TokenizerT *tk) {
   }
   start = current;
 
+  //capture everything not in delims
   while(!isInDelims(tk->delims, tk->inputString[current])) {
     current++;
   }
@@ -140,11 +142,12 @@ int main(int argc, char **argv)
     printf("Empty argument detected.\n");
     return 1;
   }
+
   char *delims =  argv[1];
   char *tokens =  argv[2];
 
   TokenizerT *tk = TKCreate(delims, tokens);
-  TKDestroy(tk);
+  //TKDestroy(tk);
 
   return 0;
 };
