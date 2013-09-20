@@ -155,6 +155,7 @@ char * processTokens(char * unprocessed)
     if(*currentChar == '\\'){
       slashCount++;
     }
+    currentChar++;
   }
 
   currentChar = processed;
