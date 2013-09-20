@@ -107,6 +107,9 @@ char *TKGetNextToken(TokenizerT *tk) {
   //go past everything in delims
   if(isInDelims(tk->delims, tk->inputString[current])){
     while(isInDelims(tk->delims, tk->inputString[current])){
+        if (tk->inputString[current] == '\0'){
+            return 0;
+        }
       current++;
     }
   }
