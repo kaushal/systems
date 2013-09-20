@@ -26,6 +26,7 @@ typedef struct TokenizerT_ TokenizerT;
 
 char *TKGetNextToken(TokenizerT *tk);
 int isInDelims(char * delims, char letter);
+void replaceSpecial(char * character);
 
 /*
  * TKCreate creates a new TokenizerT object for a given set of separator
@@ -95,11 +96,11 @@ void TKDestroy(TokenizerT *tk) {
  * You need to fill in this function as part of your implementation.
  */
 
-//TODO: two delims in a row
+//TODO: string ends with delim
 //TODO: special characters
 char *TKGetNextToken(TokenizerT *tk) {
-  int start = tk->current;
-  int current= start;
+  int tokenStart = tk->current;
+  int current= tokenStart;
   if(tk->inputString[current] == '\0'){
       return 0;
   }
@@ -109,17 +110,17 @@ char *TKGetNextToken(TokenizerT *tk) {
       current++;
     }
   }
-  start = current;
+  tokenStart = current;
 
   //capture everything not in delims
   while(!isInDelims(tk->delims, tk->inputString[current])) {
     current++;
   }
-  if(current > start) {
+  if(current > tokenStart) {
     tk->current = current;
     const char* from = tk->inputString;
-    char *to = (char*) malloc(current-start);
-    char * temp2 = strncpy(to, from + start, current - start);
+    char *to = (char*) malloc(current-tokenStart + 1);
+    char * temp2 = strncpy(to, from + tokenStart, current - tokenStart + 1);
     return temp2;
   }
   else {
@@ -136,6 +137,65 @@ int isInDelims(char * delims, char letter)
     }
   }
   return 0;
+}
+
+char * processTokens(char * unprocessed)
+{
+  char * processed = (char*) malloc(sizeof(unprocessed));
+  strcpy(processed, unprocessed);
+  char * currentChar = processed;
+  int slashCount = 0;
+
+  //  h\nw
+
+  while(*currentChar != '\0'){
+    if(*currentChar == '\\'){
+      slashCount++;
+    }
+  }
+
+  currentChar = processed;
+
+  while(*currentChar != '\0') {
+    if(*currentChar == '\\') {
+      replaceSpecial(++currentChar);
+    }
+    currentChar++;
+  }
+  return processed;
+}
+
+void replaceSpecial(char * character)
+{
+  switch(*character) {
+    case 'n':
+      *character = '\n';
+      break;
+    case 't':
+      *character = '\t';
+      break;
+    case 'v':
+      *character = '\v';
+      break;
+    case 'b':
+      *character = '\b';
+      break;
+    case 'r':
+      *character = '\r';
+      break;
+    case 'f':
+      *character = '\f';
+      break;
+    case '\\':
+      *character = '\\';
+      break;
+    case 'a':
+      *character = '\a';
+      break;
+    case '"':
+      *character = '"';
+      break;
+  }
 }
 
 /*
@@ -162,6 +222,9 @@ int main(int argc, char **argv)
 
   char *delims =  argv[1];
   char *tokens =  argv[2];
+
+  char * processedTokens = malloc(sizeof(tokens));
+  processedTokens = processTokens(tokens);
 
   TokenizerT *tk = TKCreate(delims, tokens);
   TKDestroy(tk);
