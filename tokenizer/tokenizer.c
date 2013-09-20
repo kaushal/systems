@@ -26,7 +26,7 @@ typedef struct TokenizerT_ TokenizerT;
 
 char *TKGetNextToken(TokenizerT *tk);
 int isInDelims(char * delims, char letter);
-void replaceSpecial(char * character);
+void replaceSpecial(char * destination, char * sourceChar);
 
 /*
  * TKCreate creates a new TokenizerT object for a given set of separator
@@ -66,11 +66,33 @@ TokenizerT *TKCreate(char *separators, char *ts) {
         }
         tempNode->next=newNode;
     }
-    printf("%s\n", currToken);
-  }
 
+  }
   return tokenStruct;
   //TODO function must return NULL otherwise
+}
+
+
+
+void printList(TokenizerT *tk){
+    Node * newNode;
+    newNode = tk->head;
+
+    while(newNode != NULL){
+        char * currentTokenString = newNode->data;
+        while(*currentTokenString != '\0') {
+            if(((int)*currentTokenString >= 7 &&  (int)*currentTokenString <=13) ||
+                    (int)*currentTokenString == 92) {
+                printf("[0x%.2x]", *currentTokenString);
+            }
+            else {
+                printf("%c", *currentTokenString);
+            }
+            currentTokenString++;
+        }
+        printf("\n");
+        newNode = newNode->next;
+    }
 }
 
 /*
@@ -81,6 +103,12 @@ TokenizerT *TKCreate(char *separators, char *ts) {
  */
 
 void TKDestroy(TokenizerT *tk) {
+    Node * pointerNode = tk->head;
+    while(pointerNode != NULL) {
+        Node * temp = pointerNode;
+        pointerNode = pointerNode->next;
+        free(temp);
+    }
   free(tk);
 }
 
@@ -96,8 +124,6 @@ void TKDestroy(TokenizerT *tk) {
  * You need to fill in this function as part of your implementation.
  */
 
-//TODO: string ends with delim
-//TODO: special characters
 char *TKGetNextToken(TokenizerT *tk) {
   int tokenStart = tk->current;
   int current= tokenStart;
@@ -122,8 +148,8 @@ char *TKGetNextToken(TokenizerT *tk) {
   if(current > tokenStart) {
     tk->current = current;
     const char* from = tk->inputString;
-    char *to = (char*) malloc(current-tokenStart + 1);
-    char * temp2 = strncpy(to, from + tokenStart, current - tokenStart + 1);
+    char *to = (char*) malloc(current-tokenStart);
+    char * temp2 = strncpy(to, from + tokenStart, current - tokenStart);
     return temp2;
   }
   else {
@@ -134,8 +160,10 @@ char *TKGetNextToken(TokenizerT *tk) {
 int isInDelims(char * delims, char letter)
 {
   int i = 0;
+  if(letter == '\0')
+      return 1;
   for(i = 0; i < strlen(delims); i++) {
-    if(delims[i] == letter || letter == '\0') {
+    if(delims[i] == letter) {
       return 1;
     }
   }
@@ -145,59 +173,55 @@ int isInDelims(char * delims, char letter)
 char * processTokens(char * unprocessed)
 {
   char * processed = (char*) malloc(sizeof(unprocessed));
-  strcpy(processed, unprocessed);
-  char * currentChar = processed;
-  int slashCount = 0;
+  char * head = processed;
+  char * currentChar = unprocessed;
 
-  //  h\nw
-
-  while(*currentChar != '\0'){
-    if(*currentChar == '\\'){
-      slashCount++;
+ while(*currentChar != '\0') {
+    if(*currentChar == '\\' && *(currentChar + 1) != '\0') {
+        replaceSpecial(processed, ++currentChar);
+    }
+    else{
+        *processed = *currentChar;
     }
     currentChar++;
+    processed++;
   }
-
-  currentChar = processed;
-
-  while(*currentChar != '\0') {
-    if(*currentChar == '\\') {
-      replaceSpecial(++currentChar);
-    }
-    currentChar++;
-  }
-  return processed;
+  *processed = '\0';
+  return head;
 }
 
-void replaceSpecial(char * character)
+void replaceSpecial(char * destination, char * sourceChar)
 {
-  switch(*character) {
+  switch(*sourceChar) {
     case 'n':
-      *character = '\n';
+      *destination = '\n';
       break;
     case 't':
-      *character = '\t';
+      *destination = '\t';
       break;
     case 'v':
-      *character = '\v';
+      *destination = '\v';
       break;
     case 'b':
-      *character = '\b';
+      *destination = '\b';
       break;
     case 'r':
-      *character = '\r';
+      *destination = '\r';
       break;
     case 'f':
-      *character = '\f';
+      *destination = '\f';
       break;
     case '\\':
-      *character = '\\';
+      *destination = '\\';
       break;
     case 'a':
-      *character = '\a';
+      *destination = '\a';
       break;
     case '"':
-      *character = '"';
+      *destination = '"';
+      break;
+    default:
+      *destination = *sourceChar;
       break;
   }
 }
@@ -213,14 +237,13 @@ void replaceSpecial(char * character)
 int main(int argc, char **argv)
 {
   //Program needs three arguments to run
-  if(argc != 3) {
-    printf("Need two arguments.\n");
+  if(argc > 3) {
+    printf("Too many => error.\n");
     return 1;
   }
 
-  //Arguments must not be empty
-  if(!strlen(argv[1]) || !strlen(argv[2])) {
-    printf("Empty argument detected.\n");
+  if(argc < 3) {
+    printf("Too few => error.\n");
     return 1;
   }
 
@@ -229,9 +252,12 @@ int main(int argc, char **argv)
 
   char * processedTokens = malloc(sizeof(tokens));
   processedTokens = processTokens(tokens);
-
-  TokenizerT *tk = TKCreate(delims, tokens);
+  char* processedDelims = malloc(sizeof(delims));
+  processedDelims = processTokens(delims);
+  TokenizerT *tk = TKCreate(processedDelims, processedTokens);
+  printList(tk);
   TKDestroy(tk);
 
+  printf("\n");
   return 0;
 };
