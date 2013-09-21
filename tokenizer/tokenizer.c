@@ -8,17 +8,19 @@
 /*
  * Tokenizer type.  You need to fill in the type as part of your implementation.
  */
+struct TokenizerT_ {
+    struct Node_ * head;
+    char * inputString;
+    char * delims;
+    int current;
+};
+/*
+ * Node type for the linked list
+ * */
 
 struct Node_ {
-  char * data;
-  struct Node_ * next;
-};
-
-struct TokenizerT_ {
-  struct Node_ * head;
-  char * inputString;
-  char * delims;
-  int current;
+    char * data;
+    struct Node_ * next;
 };
 
 typedef struct Node_ Node;
@@ -43,36 +45,40 @@ void replaceSpecial(char * destination, char * sourceChar);
  */
 
 TokenizerT *TKCreate(char *separators, char *ts) {
-  char *currToken;
-  Node * newNode;
-  Node * tempNode;
-  TokenizerT *tokenStruct = (TokenizerT*)
-    malloc(sizeof(TokenizerT));
-  tokenStruct->current = 0;
-  tokenStruct->delims = separators;
-  tokenStruct->inputString = ts;
-  tokenStruct->head = NULL;
-  while((currToken = TKGetNextToken(tokenStruct)) != 0) {
-    newNode = malloc(sizeof(Node));
-    newNode->data = currToken;
-    newNode->next = NULL;
-    tempNode = tokenStruct->head;
-    if(tempNode == NULL){
-        tokenStruct->head = newNode;
-    }
-    else{
-        while(tempNode->next != NULL){
-            tempNode = tempNode->next;
+    char *currToken;
+    Node * newNode;
+    Node * tempNode;
+    TokenizerT *tokenStruct = (TokenizerT*)
+        malloc(sizeof(TokenizerT));
+    tokenStruct->current = 0;
+    tokenStruct->delims = separators;
+    tokenStruct->inputString = ts;
+    tokenStruct->head = NULL;
+    while((currToken = TKGetNextToken(tokenStruct)) != 0) {
+        newNode = malloc(sizeof(Node));
+        newNode->data = currToken;
+        newNode->next = NULL;
+        tempNode = tokenStruct->head;
+        if(tempNode == NULL){
+            tokenStruct->head = newNode;
         }
-        tempNode->next=newNode;
-    }
+        else{
+            while(tempNode->next != NULL){
+                tempNode = tempNode->next;
+            }
+            tempNode->next=newNode;
+        }
 
-  }
-  return tokenStruct;
-  //TODO function must return NULL otherwise
+    }
+    return tokenStruct;
+    //TODO function must return NULL otherwise
 }
 
-
+/*
+ * printList iterates through the linked list
+ * printing normal charcters when it encounters them
+ * and printing hex values otherwise
+  */
 
 void printList(TokenizerT *tk){
     Node * newNode;
@@ -109,7 +115,7 @@ void TKDestroy(TokenizerT *tk) {
         pointerNode = pointerNode->next;
         free(temp);
     }
-  free(tk);
+    free(tk);
 }
 
 /*
@@ -125,105 +131,119 @@ void TKDestroy(TokenizerT *tk) {
  */
 
 char *TKGetNextToken(TokenizerT *tk) {
-  int tokenStart = tk->current;
-  int current= tokenStart;
-  if(tk->inputString[current] == '\0'){
-      return 0;
-  }
-  //go past everything in delims
-  if(isInDelims(tk->delims, tk->inputString[current])){
-    while(isInDelims(tk->delims, tk->inputString[current])){
-        if (tk->inputString[current] == '\0'){
-            return 0;
-        }
-      current++;
+    int tokenStart = tk->current;
+    int current= tokenStart;
+    if(tk->inputString[current] == '\0'){
+        return 0;
     }
-  }
-  tokenStart = current;
+    //go past everything in delims
+    if(isInDelims(tk->delims, tk->inputString[current])){
+        while(isInDelims(tk->delims, tk->inputString[current])){
+            if (tk->inputString[current] == '\0'){
+                return 0;
+            }
+            current++;
+        }
+    }
+    tokenStart = current;
 
-  //capture everything not in delims
-  while(!isInDelims(tk->delims, tk->inputString[current])) {
-    current++;
-  }
-  if(current > tokenStart) {
-    tk->current = current;
-    const char* from = tk->inputString;
-    char *to = (char*) malloc(current-tokenStart);
-    char * temp2 = strncpy(to, from + tokenStart, current - tokenStart);
-    return temp2;
-  }
-  else {
-    return 0;
-  }
+    //capture everything not in delims
+    while(!isInDelims(tk->delims, tk->inputString[current])) {
+        current++;
+    }
+    if(current > tokenStart) {
+        tk->current = current;
+        const char* from = tk->inputString;
+        char *to = (char*) malloc(current-tokenStart);
+        char * temp2 = strncpy(to, from + tokenStart, current - tokenStart);
+        return temp2;
+    }
+    else {
+        return 0;
+    }
 }
+
+/*
+ * Return 0 or 1 depending on if the letter
+ * is in the delimiters
+ */
 
 int isInDelims(char * delims, char letter)
 {
-  int i = 0;
-  if(letter == '\0')
-      return 1;
-  for(i = 0; i < strlen(delims); i++) {
-    if(delims[i] == letter) {
-      return 1;
+    int i = 0;
+    if(letter == '\0')
+        return 1;
+    for(i = 0; i < strlen(delims); i++) {
+        if(delims[i] == letter) {
+            return 1;
+        }
     }
-  }
-  return 0;
+    return 0;
 }
+
+/*
+ * A preporcessinfg function that searches for special
+ * characters
+ */
 
 char * processTokens(char * unprocessed)
 {
-  char * processed = (char*) malloc(sizeof(unprocessed));
-  char * head = processed;
-  char * currentChar = unprocessed;
+    char * processed = (char*) malloc(sizeof(unprocessed));
+    char * head = processed;
+    char * currentChar = unprocessed;
 
- while(*currentChar != '\0') {
-    if(*currentChar == '\\' && *(currentChar + 1) != '\0') {
-        replaceSpecial(processed, ++currentChar);
+    while(*currentChar != '\0') {
+        if(*currentChar == '\\' && *(currentChar + 1) != '\0') {
+            replaceSpecial(processed, ++currentChar);
+        }
+        else{
+            *processed = *currentChar;
+        }
+        currentChar++;
+        processed++;
     }
-    else{
-        *processed = *currentChar;
-    }
-    currentChar++;
-    processed++;
-  }
-  *processed = '\0';
-  return head;
+    *processed = '\0';
+    return head;
 }
+
+/* A big switch statement that builds a new string
+ * with special charaters
+ */
 
 void replaceSpecial(char * destination, char * sourceChar)
 {
-  switch(*sourceChar) {
-    case 'n':
-      *destination = '\n';
-      break;
-    case 't':
-      *destination = '\t';
-      break;
-    case 'v':
-      *destination = '\v';
-      break;
-    case 'b':
-      *destination = '\b';
-      break;
-    case 'r':
-      *destination = '\r';
-      break;
-    case 'f':
-      *destination = '\f';
-      break;
-    case '\\':
-      *destination = '\\';
-      break;
-    case 'a':
-      *destination = '\a';
-      break;
-    case '"':
-      *destination = '"';
-      break;
-    default:
-      *destination = *sourceChar;
-      break;
-  }
+    switch(*sourceChar) {
+        case 'n':
+            *destination = '\n';
+            break;
+        case 't':
+            *destination = '\t';
+            break;
+        case 'v':
+            *destination = '\v';
+            break;
+        case 'b':
+            *destination = '\b';
+            break;
+        case 'r':
+            *destination = '\r';
+            break;
+        case 'f':
+            *destination = '\f';
+            break;
+        case '\\':
+            *destination = '\\';
+            break;
+        case 'a':
+            *destination = '\a';
+            break;
+        case '"':
+            *destination = '"';
+            break;
+        default:
+            *destination = *sourceChar;
+            break;
+    }
 }
 
 /*
@@ -236,28 +256,29 @@ void replaceSpecial(char * destination, char * sourceChar)
 
 int main(int argc, char **argv)
 {
-  //Program needs three arguments to run
-  if(argc > 3) {
-    printf("Too many => error.\n");
-    return 1;
-  }
+    //Program needs three arguments to run
+    if(argc > 3) {
+        printf("Too many => error.\n");
+        return 1;
+    }
 
-  if(argc < 3) {
-    printf("Too few => error.\n");
-    return 1;
-  }
+    if(argc < 3) {
+        printf("Too few => error.\n");
+        return 1;
+    }
 
-  char *delims =  argv[1];
-  char *tokens =  argv[2];
+    char *delims =  argv[1];
+    char *tokens =  argv[2];
 
-  char * processedTokens = malloc(sizeof(tokens));
-  processedTokens = processTokens(tokens);
-  char* processedDelims = malloc(sizeof(delims));
-  processedDelims = processTokens(delims);
-  TokenizerT *tk = TKCreate(processedDelims, processedTokens);
-  printList(tk);
-  TKDestroy(tk);
+    char * processedTokens = malloc(sizeof(tokens));
+    processedTokens = processTokens(tokens);
+    char* processedDelims = malloc(sizeof(delims));
 
-  printf("\n");
-  return 0;
+    processedDelims = processTokens(delims);
+    TokenizerT *tk = TKCreate(processedDelims, processedTokens);
+    printList(tk);
+    TKDestroy(tk);
+
+    printf("\n");
+    return 0;
 };
