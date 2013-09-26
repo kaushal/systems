@@ -6,11 +6,17 @@
 
 #include <stdlib.h>
 
+struct Node{
+    struct Node next;
+    void *data;
+}
+
 /*
  * Sorted list type.  You need to fill in the type as part of your implementation.
  */
 struct SortedList
 {
+    struct Node head;
 };
 typedef struct SortedList* SortedListPtr;
 
