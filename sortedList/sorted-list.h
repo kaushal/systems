@@ -10,17 +10,21 @@
  * Node type.  Has Node next and data.
  */
 struct Node_ {
-    struct Node next;
+    struct Node_ *next;
     void *data;
-}
+};
 typedef struct Node_ Node;
 
 /*
  * Sorted list type.  You need to fill in the type as part of your implementation.
  */
+
+typedef int (*CompareFuncT)(void *, void *);
+
 struct SortedList
 {
-    Node head;
+    Node *head;
+    CompareFuncT comp;
 };
 typedef struct SortedList* SortedListPtr;
 
@@ -49,7 +53,6 @@ typedef struct SortedListIterator* SortedListIteratorPtr;
  * created.
  */
 
-typedef int (*CompareFuncT)(void *, void *);
 
 
 /*
@@ -87,38 +90,39 @@ void SLDestroy(SortedListPtr list);
 int SLInsert(SortedListPtr list, void *newObj)
 {
   if(list->head == NULL) {
-    Node newNode = malloc(sizeof(Node));
-    newNode->data =  *newObj;
+    Node *newNode = malloc(sizeof(Node));
+    newNode->data =  newObj;
     list->head = newNode;
     return 1;
   }
   else {
-    Node currentNode = list->head;
-    Node nextNode = NULL;
+    Node *currentNode = list->head;
+    Node *nextNode = NULL;
 
     //newobj is less than head of list
-    int currentResult = CompareFuncT(currentNode, *newObj);
-    if(result < 0 || result == 0) {
+    int currentResult = list->comp(currentNode, newObj);
+    int nextResult;
+    if(currentResult <= 0) {
       currentNode->next = list->head;
       list->head = currentNode;
       return 1;
     }
     //newobj is in the middle of the list
-    while(currentNode.next != NULL) {
-      nextNode = currentNode.next;
-      currentResult = CompareFuncT(currentNode, *newObj);
-      nextResult = CompareFuncT(nextNode, *newObj);
+    while(currentNode->next != NULL) {
+      nextNode = currentNode->next;
+      currentResult = list->comp(currentNode, newObj);
+      nextResult = list->comp(nextNode, newObj);
       if(currentResult < 0 && nextResult >= 0) {
-        Node newNode = malloc(sizeof(Node));
-        newNode->data =  *newObj;
+        Node *newNode = malloc(sizeof(Node));
+        newNode->data =  newObj;
         newNode->next = nextNode;
         currentNode->next = newNode;
         return 1;
       }
     }
-    Node newNode = malloc(sizeof(Node));
-    newNode->next = *newObj;
-    currentNode->next =  *newObj;
+    Node *newNode = malloc(sizeof(Node));
+    newNode->next = newObj;
+    currentNode->next =  newObj;
     return 1;
   }
   return 0;
