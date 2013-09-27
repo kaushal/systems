@@ -66,7 +66,13 @@ typedef struct SortedListIterator* SortedListIteratorPtr;
  * You need to fill in this function as part of your implementation.
  */
 
-SortedListPtr SLCreate(CompareFuncT cf);
+SortedListPtr SLCreate(CompareFuncT cf)
+{
+  SortedListPtr newList = malloc(sizeof(SortedListPtr));
+  newList->head = NULL;
+  newList->comp = cf;
+  return newList;
+}
 
 /*
  * SLDestroy destroys a list, freeing all dynamically allocated memory.
