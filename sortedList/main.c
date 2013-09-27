@@ -31,4 +31,6 @@ int compareStrings(void *p1, void *p2)
 
 int main()
 {
+    SortedListPtr a;
+
 }

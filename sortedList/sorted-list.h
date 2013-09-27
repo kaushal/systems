@@ -192,6 +192,8 @@ void SLDestroyIterator(SortedListIteratorPtr iter);
  * You need to fill in this function as part of your implementation.
  */
 
-void *SLNextItem(SortedListIteratorPtr iter);
+void *SLNextItem(SortedListIteratorPtr iter){
+    return iter->node->next;
+}
 
 #endif
