@@ -35,6 +35,7 @@ typedef struct SortedList* SortedListPtr;
  */
 struct SortedListIterator
 {
+    Node *node;
 };
 typedef struct SortedListIterator* SortedListIteratorPtr;
 
@@ -157,7 +158,11 @@ int SLRemove(SortedListPtr list, void *newObj);
  * You need to fill in this function as part of your implementation.
  */
 
-SortedListIteratorPtr SLCreateIterator(SortedListPtr list);
+SortedListIteratorPtr SLCreateIterator(SortedListPtr list){
+    SortedListIteratorPtr iter = malloc(sizeof(struct SortedListIterator));
+    iter->node = list->head;
+    return iter;
+}
 
 
 /*
