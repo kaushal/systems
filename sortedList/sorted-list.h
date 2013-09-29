@@ -153,6 +153,7 @@ int SLRemove(SortedListPtr list, void *target)
 
   Node *pointer = list->head;
   Node *prev = NULL;
+
   if(list->head == target) {
     list->head = list->head->next;
     return 1;
@@ -168,7 +169,6 @@ int SLRemove(SortedListPtr list, void *target)
   }
   return 0;
 }
-
 
 /*
  * SLCreateIterator creates an iterator object that will allow the caller
@@ -218,7 +218,7 @@ void SLDestroyIterator(SortedListIteratorPtr iter)
  */
 
 void *SLNextItem(SortedListIteratorPtr iter){
-    return iter->node->next;
+  return iter->node->next;
 }
 
 #endif

@@ -32,5 +32,9 @@ int compareStrings(void *p1, void *p2)
 int main()
 {
     SortedListPtr a;
-
+    a = SLCreate(compareStrings);
+    SortedListIteratorPtr iter = SLCreateIterator(a);
+    SLInsert(a, "aaa");
+    SLInsert(a, "bbb");
+    SLInsert(a, "ccc");
 }
