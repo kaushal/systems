@@ -145,7 +145,29 @@ int SLInsert(SortedListPtr list, void *newObj)
  * You need to fill in this function as part of your implementation.
  */
 
-int SLRemove(SortedListPtr list, void *newObj);
+int SLRemove(SortedListPtr list, void *target)
+{
+  if(list == NULL || list->head == NULL) {
+    return 0;
+  }
+
+  Node *pointer = list->head;
+  Node *prev = NULL;
+  if(list->head == target) {
+    list->head = list->head->next;
+    return 1;
+  }
+  while(pointer->next != NULL) {
+    if(pointer == target) {
+      prev->next = pointer->next;
+      free(pointer);
+      return 1;
+    }
+    prev = pointer;
+    pointer = pointer->next;
+  }
+  return 0;
+}
 
 
 /*
@@ -174,7 +196,10 @@ SortedListIteratorPtr SLCreateIterator(SortedListPtr list){
  * You need to fill in this function as part of your implementation.
  */
 
-void SLDestroyIterator(SortedListIteratorPtr iter);
+void SLDestroyIterator(SortedListIteratorPtr iter)
+{
+  free(iter);
+}
 
 
 /*
