@@ -107,7 +107,7 @@ int SLInsert(SortedListPtr list, void *newObj)
     Node *nextNode = NULL;
 
     //newobj is less than head of list
-    int currentResult = list->comp(currentNode, newObj);
+    int currentResult = list->comp(newObj, currentNode->data);
     int nextResult;
     if(currentResult <= 0) {
       currentNode->next = list->head;
@@ -117,8 +117,8 @@ int SLInsert(SortedListPtr list, void *newObj)
     //newobj is in the middle of the list
     while(currentNode->next != NULL) {
       nextNode = currentNode->next;
-      currentResult = list->comp(currentNode, newObj);
-      nextResult = list->comp(nextNode, newObj);
+      currentResult = list->comp(newObj,currentNode->data);
+      nextResult = list->comp(newObj ,nextNode->data);
       if(currentResult < 0 && nextResult >= 0) {
         Node *newNode = malloc(sizeof(Node));
         newNode->data =  newObj;
@@ -126,10 +126,11 @@ int SLInsert(SortedListPtr list, void *newObj)
         currentNode->next = newNode;
         return 1;
       }
+      currentNode = currentNode->next;
     }
     Node *newNode = malloc(sizeof(Node));
-    newNode->next = newObj;
-    currentNode->next =  newObj;
+    newNode->data = newObj;
+    currentNode->next =  newNode;
     return 1;
   }
   return 0;
@@ -220,6 +221,9 @@ void SLDestroyIterator(SortedListIteratorPtr iter)
  */
 
 void *SLNextItem(SortedListIteratorPtr iter){
+    if(iter->node == NULL){
+        return NULL;
+    }
     void * returnData = iter->node->data;
     iter->node = iter->node->next;
 

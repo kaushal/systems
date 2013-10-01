@@ -38,16 +38,9 @@ int main()
     SLInsert(a, "ccc");
     SortedListIteratorPtr iter = SLCreateIterator(a);
     void* ab = SLNextItem(iter);
-    printf("%s", ab);
+    printf("%s", (char*)ab);
     ab = SLNextItem(iter);
     printf("%s", ab);
     ab = SLNextItem(iter);
     printf("%s", ab);
-    ab = SLNextItem(iter);
-    printf("%s", ab);
-    ab = SLNextItem(iter);
-    printf("%s", ab);
-
-    ab = SLNextItem(iter);
-    ab = SLNextItem(iter);
 }
