@@ -33,8 +33,21 @@ int main()
 {
     SortedListPtr a;
     a = SLCreate(compareStrings);
-    SortedListIteratorPtr iter = SLCreateIterator(a);
     SLInsert(a, "aaa");
     SLInsert(a, "bbb");
     SLInsert(a, "ccc");
+    SortedListIteratorPtr iter = SLCreateIterator(a);
+    void* ab = SLNextItem(iter);
+    printf("%s", ab);
+    ab = SLNextItem(iter);
+    printf("%s", ab);
+    ab = SLNextItem(iter);
+    printf("%s", ab);
+    ab = SLNextItem(iter);
+    printf("%s", ab);
+    ab = SLNextItem(iter);
+    printf("%s", ab);
+
+    ab = SLNextItem(iter);
+    ab = SLNextItem(iter);
 }
