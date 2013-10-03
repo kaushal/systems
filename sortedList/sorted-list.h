@@ -85,8 +85,8 @@ void SLDestroy(SortedListPtr list)
   if(list == NULL || list->head == NULL)
     return;
 
-  Node current = list->head;
-  Node prev = NULL;
+  Node * current = list->head;
+  Node * prev = NULL;
 
   while(current->next != NULL) {
     prev = current;
