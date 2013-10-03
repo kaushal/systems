@@ -80,8 +80,21 @@ SortedListPtr SLCreate(CompareFuncT cf)
  *
  * You need to fill in this function as part of your implementation.
  */
-void SLDestroy(SortedListPtr list);
+void SLDestroy(SortedListPtr list)
+{
+  if(list == NULL || list->head == NULL)
+    return;
 
+  Node current = list->head;
+  Node prev = NULL;
+
+  while(current->next != NULL) {
+    prev = current;
+    current = current->next;
+    free(prev);
+  }
+  free(list);
+}
 
 /*
  * SLInsert inserts a given object into a sorted list, maintaining sorted
