@@ -32,19 +32,47 @@ int compareStrings(void *p1, void *p2)
 int main()
 {
     SortedListPtr a;
-    a = SLCreate(compareInts);
-    int * one;
-    int * two = 2;
-    int * three = 3;
-    SLInsert(a, one);
-    SLInsert(a, two);
-    SLInsert(a, three);
+    a = SLCreate(compareStrings);
+    SLInsert(a, "aaa");
+    SLInsert(a, "ccc");
+    SLInsert(a, "ddd");
+
     SortedListIteratorPtr iter = SLCreateIterator(a);
+    SortedListIteratorPtr iter1 = SLCreateIterator(a);
+    SortedListIteratorPtr iter2 = SLCreateIterator(a);
+
     void* ab = SLNextItem(iter);
-    printf("%s", (char*)ab);
+    printf("--------%s--------", (char*)ab);
+
+    ab = SLNextItem(iter1);
+    printf("--------%s--------", (char*)ab);
+
+    ab = SLNextItem(iter2);
+    printf("--------%s--------", (char*)ab);
+    printf("\n");
+
+    SLInsert(a, "bbb");
+
+
     ab = SLNextItem(iter);
-    printf("%s", ab);
+    printf("--------%s--------", (char*)ab);
+
+
+    ab = SLNextItem(iter1);
+    printf("--------%s--------", (char*)ab);
+
+    ab = SLNextItem(iter2);
+    printf("--------%s--------", (char*)ab);
+
+
     ab = SLNextItem(iter);
-    printf("%s", ab);
-    SLDestroy(a);
+    printf("--------%s--------", (char*)ab);
+
+
+    ab = SLNextItem(iter1);
+    printf("--------%s--------", (char*)ab);
+
+    ab = SLNextItem(iter2);
+    printf("--------%s--------", (char*)ab);
+
 }

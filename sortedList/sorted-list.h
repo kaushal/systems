@@ -122,17 +122,20 @@ int SLInsert(SortedListPtr list, void *newObj)
     //newobj is less than head of list
     int currentResult = list->comp(newObj, currentNode->data);
     int nextResult;
-    if(currentResult <= 0) {
-      currentNode->next = list->head;
-      list->head = currentNode;
-      return 1;
+    if(currentResult >= 0) {
+        Node *newNode = malloc(sizeof(Node));
+        newNode->data = newObj;
+
+        newNode->next = currentNode;
+        list->head = newNode;
+        return 1;
     }
     //newobj is in the middle of the list
     while(currentNode->next != NULL) {
       nextNode = currentNode->next;
       currentResult = list->comp(newObj,currentNode->data);
       nextResult = list->comp(newObj ,nextNode->data);
-      if(currentResult < 0 && nextResult >= 0) {
+      if(currentResult <= 0 && nextResult > 0) {
         Node *newNode = malloc(sizeof(Node));
         newNode->data =  newObj;
         newNode->next = nextNode;
@@ -182,6 +185,9 @@ int SLRemove(SortedListPtr list, void *target)
     }
     prev = pointer;
     pointer = pointer->next;
+  }
+  if(pointer->data == target){
+    prev->next = NULL;
   }
   return 0;
 }
