@@ -6,6 +6,8 @@
 
 #include <stdlib.h>
 
+typedef struct SortedListIterator* SortedListIteratorPtr;
+
 /*
  * Node type.  Has Node next and data.
  */
@@ -14,6 +16,15 @@ struct Node_ {
     void *data;
 };
 typedef struct Node_ Node;
+
+/*
+ * IterNode type.  Has IterNode next and iterator.
+ */
+struct IterNode_ {
+    struct IterNode_ *next;
+    SortedListIteratorPtr *iterator;
+};
+typedef struct IterNode_ IterNode;
 
 /*
  * Sorted list type.  You need to fill in the type as part of your implementation.
@@ -25,6 +36,7 @@ struct SortedList
 {
     Node *head;
     CompareFuncT comp;
+    IterNode * iterHead;
 };
 typedef struct SortedList* SortedListPtr;
 
@@ -37,7 +49,6 @@ struct SortedListIterator
 {
     Node *node;
 };
-typedef struct SortedListIterator* SortedListIteratorPtr;
 
 
 /*
@@ -72,6 +83,7 @@ SortedListPtr SLCreate(CompareFuncT cf)
   SortedListPtr newList = malloc(sizeof(SortedListPtr));
   newList->head = NULL;
   newList->comp = cf;
+  newList->iterHead = NULL;
   return newList;
 }
 
@@ -84,6 +96,11 @@ void SLDestroy(SortedListPtr list)
 {
   if(list == NULL || list->head == NULL)
     return;
+
+  IterNode *temp = list->iterHead;
+  while(temp->next != NULL) {
+    free(temp);
+  }
 
   Node * current = list->head;
   Node * prev = NULL;
@@ -204,6 +221,16 @@ int SLRemove(SortedListPtr list, void *target)
 
 SortedListIteratorPtr SLCreateIterator(SortedListPtr list){
     SortedListIteratorPtr iter = malloc(sizeof(struct SortedListIterator));
+    if(list->iterHead == NULL) {
+      list->iterHead = malloc(sizeof(IterNode));
+      list->iterHead->iterator = iter;
+    }
+    else {
+      IterNode *tempNode = malloc(sizeof(IterNode));
+      tempNode->iterator = iter;
+      tempNode->next = list->iterHead;
+      list->iterHead = tempNode;
+    }
     iter->node = list->head;
     return iter;
 }
