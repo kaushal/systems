@@ -32,10 +32,13 @@ int compareStrings(void *p1, void *p2)
 int main()
 {
     SortedListPtr a;
-    a = SLCreate(compareStrings);
-    SLInsert(a, "aaa");
-    SLInsert(a, "bbb");
-    SLInsert(a, "ccc");
+    a = SLCreate(compareInts);
+    int * one;
+    int * two = 2;
+    int * three = 3;
+    SLInsert(a, one);
+    SLInsert(a, two);
+    SLInsert(a, three);
     SortedListIteratorPtr iter = SLCreateIterator(a);
     void* ab = SLNextItem(iter);
     printf("%s", (char*)ab);
@@ -43,4 +46,5 @@ int main()
     printf("%s", ab);
     ab = SLNextItem(iter);
     printf("%s", ab);
+    SLDestroy(a);
 }
