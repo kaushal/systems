@@ -1,0 +1,54 @@
+Test plan for program:
+
+The plan for testing this program revolves around inserting and deleting nods while steping through the list with iterators.
+
+
+case1: 
+insert
+12
+13
+1
+2
+3
+5
+create iterators
+step through, while inserting and deleting random nodes
+
+
+case2:
+insert 1
+iterate
+delete 1
+insert 2
+
+case3:
+insert 3
+insert 2
+insert 1
+
+delete 3, 2, 1
+
+
+case4:
+insert:
+12
+56
+1
+2
+3
+5
+
+insert 2
+
+delete
+56
+12
+1
+2
+3
+5
+
+iterate
+should print only 2
+
+

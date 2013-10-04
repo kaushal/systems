@@ -4,5 +4,13 @@ The efficiency of our program is O(n*k) where n is the number of items in the li
 
 The problems that we ran into were related to the iterators while removing/adding nodes.
 
+We added a few structs to help us with this solution. We have an IterNode struct that has a linked list of iterators. This is to help us destroy all of the memory that we allocate. 
+
+In slinsert, we deal with three cases. 
+1) When the insertion has to happen at the head
+2) when the insertion is in the middle
+3) When the insertion is at the end
+
+Remove works in a similar way to insert.
 
 
