@@ -187,17 +187,24 @@ int SLRemove(SortedListPtr list, void *target)
 
   Node *pointer = list->head;
   Node *prev = NULL;
-
+  if(list->head->next != NULL && list->head->data == target){
+      free(list->head);
+  }
   if(list->head->data == target) {
-    prev = list->head;
-    list->head = list->head->next;
+    prev = list->head->next;
+    list->head->data = list->head->next->data;
+    list->head->next = list->head->next->next;
+
     free(prev);
     return 1;
   }
   while(pointer->next != NULL) {
     if(pointer->data == target) {
-      prev->next = pointer->next;
-      free(pointer);
+      prev = list->head->next;
+      list->head->data = list->head->next->data;
+      list->head->next = list->head->next->next;
+
+      free(prev);
       return 1;
     }
     prev = pointer;
@@ -205,6 +212,7 @@ int SLRemove(SortedListPtr list, void *target)
   }
   if(pointer->data == target){
     prev->next = NULL;
+    free(pointer);
   }
   return 0;
 }
