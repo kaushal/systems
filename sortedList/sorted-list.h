@@ -5,17 +5,18 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 
 typedef struct SortedListIterator* SortedListIteratorPtr;
+typedef struct SortedList* SortedListPtr;
+typedef struct IterNode_ IterNode;
+typedef int (*CompareFuncT)(void *, void *);
+typedef struct Node_ Node;
 
-/*
- * Node type.  Has Node next and data.
- */
 struct Node_ {
     struct Node_ *next;
     void *data;
 };
-typedef struct Node_ Node;
 
 /*
  * IterNode type.  Has IterNode next and iterator.
@@ -24,13 +25,11 @@ struct IterNode_ {
     struct IterNode_ *next;
     SortedListIteratorPtr *iterator;
 };
-typedef struct IterNode_ IterNode;
 
 /*
  * Sorted list type.  You need to fill in the type as part of your implementation.
  */
 
-typedef int (*CompareFuncT)(void *, void *);
 
 struct SortedList
 {
@@ -38,7 +37,6 @@ struct SortedList
     CompareFuncT comp;
     IterNode * iterHead;
 };
-typedef struct SortedList* SortedListPtr;
 
 
 /*
@@ -52,22 +50,6 @@ struct SortedListIterator
 
 
 /*
- * When your sorted list is used to store objects of some type, since the
- * type is opaque to you, you will need a comparator function to order
- * the objects in your sorted list.
- *
- * You can expect a comparator function to return -1 if the 1st object is
- * smaller, 0 if the two objects are equal, and 1 if the 2nd object is
- * smaller.
- *
- * Note that you are not expected to implement any comparator functions.
- * You will be given a comparator function when a new sorted list is
- * created.
- */
-
-
-
-/*
  * SLCreate creates a new, empty sorted list.  The caller must provide
  * a comparator function that can be used to order objects that will be
  * kept in the list.
@@ -78,40 +60,15 @@ struct SortedListIterator
  * You need to fill in this function as part of your implementation.
  */
 
-SortedListPtr SLCreate(CompareFuncT cf)
-{
-  SortedListPtr newList = malloc(sizeof(SortedListPtr));
-  newList->head = NULL;
-  newList->comp = cf;
-  newList->iterHead = NULL;
-  return newList;
-}
+SortedListPtr SLCreate(CompareFuncT cf);
 
 /*
  * SLDestroy destroys a list, freeing all dynamically allocated memory.
  *
  * You need to fill in this function as part of your implementation.
  */
-void SLDestroy(SortedListPtr list)
-{
-  if(list == NULL || list->head == NULL)
-    return;
+void SLDestroy(SortedListPtr list);
 
-  IterNode *temp = list->iterHead;
-  while(temp->next != NULL) {
-    free(temp);
-  }
-
-  Node * current = list->head;
-  Node * prev = NULL;
-
-  while(current->next != NULL) {
-    prev = current;
-    current = current->next;
-    free(prev);
-  }
-  free(list);
-}
 
 /*
  * SLInsert inserts a given object into a sorted list, maintaining sorted
@@ -124,50 +81,7 @@ void SLDestroy(SortedListPtr list)
  * You need to fill in this function as part of your implementation.
  */
 
-int SLInsert(SortedListPtr list, void *newObj)
-{
-  if(list->head == NULL) {
-    Node *newNode = malloc(sizeof(Node));
-    newNode->data =  newObj;
-    list->head = newNode;
-    return 1;
-  }
-  else {
-    Node *currentNode = list->head;
-    Node *nextNode = NULL;
-
-    //newobj is less than head of list
-    int currentResult = list->comp(newObj, currentNode->data);
-    int nextResult;
-    if(currentResult >= 0) {
-        Node *newNode = malloc(sizeof(Node));
-        newNode->data = newObj;
-
-        newNode->next = currentNode;
-        list->head = newNode;
-        return 1;
-    }
-    //newobj is in the middle of the list
-    while(currentNode->next != NULL) {
-      nextNode = currentNode->next;
-      currentResult = list->comp(newObj,currentNode->data);
-      nextResult = list->comp(newObj ,nextNode->data);
-      if(currentResult <= 0 && nextResult > 0) {
-        Node *newNode = malloc(sizeof(Node));
-        newNode->data =  newObj;
-        newNode->next = nextNode;
-        currentNode->next = newNode;
-        return 1;
-      }
-      currentNode = currentNode->next;
-    }
-    Node *newNode = malloc(sizeof(Node));
-    newNode->data = newObj;
-    currentNode->next =  newNode;
-    return 1;
-  }
-  return 0;
-}
+int SLInsert(SortedListPtr list, void *newObj);
 
 
 /*
@@ -179,43 +93,8 @@ int SLInsert(SortedListPtr list, void *newObj)
  * You need to fill in this function as part of your implementation.
  */
 
-int SLRemove(SortedListPtr list, void *target)
-{
-  if(list == NULL || list->head == NULL) {
-    return 0;
-  }
+int SLRemove(SortedListPtr list, void *newObj);
 
-  Node *pointer = list->head;
-  Node *prev = NULL;
-  if(list->head->next != NULL && list->head->data == target){
-      free(list->head);
-  }
-  if(list->head->data == target) {
-    prev = list->head->next;
-    list->head->data = list->head->next->data;
-    list->head->next = list->head->next->next;
-
-    free(prev);
-    return 1;
-  }
-  while(pointer->next != NULL) {
-    if(pointer->data == target) {
-      prev = list->head->next;
-      list->head->data = list->head->next->data;
-      list->head->next = list->head->next->next;
-
-      free(prev);
-      return 1;
-    }
-    prev = pointer;
-    pointer = pointer->next;
-  }
-  if(pointer->data == target){
-    prev->next = NULL;
-    free(pointer);
-  }
-  return 0;
-}
 
 /*
  * SLCreateIterator creates an iterator object that will allow the caller
@@ -227,21 +106,7 @@ int SLRemove(SortedListPtr list, void *target)
  * You need to fill in this function as part of your implementation.
  */
 
-SortedListIteratorPtr SLCreateIterator(SortedListPtr list){
-    SortedListIteratorPtr iter = malloc(sizeof(struct SortedListIterator));
-    if(list->iterHead == NULL) {
-      list->iterHead = malloc(sizeof(IterNode));
-      list->iterHead->iterator = iter;
-    }
-    else {
-      IterNode *tempNode = malloc(sizeof(IterNode));
-      tempNode->iterator = iter;
-      tempNode->next = list->iterHead;
-      list->iterHead = tempNode;
-    }
-    iter->node = list->head;
-    return iter;
-}
+SortedListIteratorPtr SLCreateIterator(SortedListPtr list);
 
 
 /*
@@ -253,10 +118,7 @@ SortedListIteratorPtr SLCreateIterator(SortedListPtr list){
  * You need to fill in this function as part of your implementation.
  */
 
-void SLDestroyIterator(SortedListIteratorPtr iter)
-{
-  free(iter);
-}
+void SLDestroyIterator(SortedListIteratorPtr iter);
 
 
 /*
@@ -274,14 +136,6 @@ void SLDestroyIterator(SortedListIteratorPtr iter)
  * You need to fill in this function as part of your implementation.
  */
 
-void *SLNextItem(SortedListIteratorPtr iter){
-    if(iter->node == NULL){
-        return NULL;
-    }
-    void * returnData = iter->node->data;
-    iter->node = iter->node->next;
-
-    return returnData;
-}
+void *SLNextItem(SortedListIteratorPtr iter);
 
 #endif
