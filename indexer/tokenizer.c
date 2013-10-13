@@ -303,7 +303,7 @@ char *TKGetNextToken(TokenizerT *tk) {
 
 int main(int argc, char **argv) {
 
-	if(argc != 3){
+	if(argc != 2){
 		printf("Error: invalid number of arguments\n");
 		return -1;
 	}
