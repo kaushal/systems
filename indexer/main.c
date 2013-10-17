@@ -3,7 +3,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <errno.h>
-
+#include <sys/stat.h>
 #include <ftw.h>
 #include <signal.h>
 
@@ -13,40 +13,61 @@ int writeDirectoriesToFile(const char *, const struct stat *, int);
 
 int main(int argc, char * argv[])
 {
-  char path[1000], *home;
-
-   if(argc < 2) {
+    remove("allFiles");//MOVE THIS TO THE END
+    char path[1000], *home;
+    FILE *fp;
+    if(argc < 2) {
         printf("Need a file to open\n");
         return 0;
-   }
+    }
 
+    DIR *dir;
+    dir = opendir(argv[1]);
+    if(dir == NULL){
+        printf("------------NULL-----------");
+        fp = fopen("allFiles", "a+");
+        fprintf(fp, "%s\n", argv[1]);
+    }
+    else{
+        home = getenv("HOME");
+        printf("%s------------------%s-------------\n", path, home);
+        printf(path, "%s/sysprog", home);
+        ftw(argv[1], writeDirectoriesToFile, 7);
+    }
 
+    fp = fopen("allFiles", "r");
+    char line[256];
 
-   home = getenv("HOME");
-   sprintf(path, "%s/sysprog", home);
-   ftw(argv[1], writeDirectoriesToFile, 7);
+    while(fgets(line, sizeof(line), fp)){
+        if(line[strlen(line) - 1] == '\n'){
+            line[strlen(line) - 1] = '\0';
+        }
+        dir = opendir(line);
+        if(dir != NULL){
+            continue;
+        }
+        printf("%s>>>>>>>>\n", line);
+    }
 
-   FILE * index = fopen(argv[1], "r");
+    /*if(index == NULL) {
+      fprintf(stderr, "Could not open index file %s\n", argv[1]);
+      return 0;
+      }
 
-   /*if(index == NULL) {
-       fprintf(stderr, "Could not open index file %s\n", argv[1]);
-       return 0;
-   }
+      char * lineptr = NULL;
+      size_t lineSize = 0;
+      ssize_t read;
+      char * token;
 
-   char * lineptr = NULL;
-   size_t lineSize = 0;
-   ssize_t read;
-   char * token;
+      while( (read = getline(&lineptr, &lineSize, index)) != -1) {
+      TokenizerT * tokenizer = TKCreate("", lineptr);
+      while((token = TKGetNextToken(tokenizer))) {
+      printf("%s\n", token);
+      }
+      }
 
-   while( (read = getline(&lineptr, &lineSize, index)) != -1) {
-       TokenizerT * tokenizer = TKCreate("", lineptr);
-       while((token = TKGetNextToken(tokenizer))) {
-           printf("%s\n", token);
-       }
-   }
-
-   fclose(index);*/
-   return 0;
+      fclose(index);*/
+    return 0;
 }
 
 int writeDirectoriesToFile(const char *path, const struct stat *sptr, int type)
@@ -67,21 +88,20 @@ int writeDirectoriesToFile(const char *path, const struct stat *sptr, int type)
 }
 
 
-
 /*
  *
-   DIR * dir;
-   struct dirent * entry;
-   extern int errno;
+ DIR * dir;
+ struct dirent * entry;
+ extern int errno;
 
-   if ( (dir = opendir(argv[1])) == 0) {
-       printf("Could not open %s as directory: %s\n", argv[1], strerror(errno));
-   }
-   else {
-       while( (entry = readdir(dir)) != 0)
-       {
-           printf("%s\n", entry->d_name);
-       }
-       closedir(dir);
-   }
-   */
+ if ( (dir = opendir(argv[1])) == 0) {
+ printf("Could not open %s as directory: %s\n", argv[1], strerror(errno));
+ }
+ else {
+ while( (entry = readdir(dir)) != 0)
+ {
+ printf("%s\n", entry->d_name);
+ }
+ closedir(dir);
+ }
+ */
