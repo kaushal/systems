@@ -13,8 +13,8 @@
  */
 
 struct FileNode{
-    char* fileName;
-    struct * fileNode nextFile;
+    char* filename;
+    struct fileNode *nextFile;
     int count;
 } FileNode;
 

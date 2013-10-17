@@ -21,6 +21,7 @@ int main(int argc, char * argv[])
         printf("Need a file to open\n");
         return 0;
     }
+    //TODO: lowercase eveything
 
     DIR *dir;
     dir = opendir(argv[1]);

@@ -9,6 +9,7 @@
 
 typedef enum {false, true} bool;
 
+
 typedef struct TrieNode
 {
   char character;
@@ -27,6 +28,8 @@ struct TrieNode *create_trienode(char c, struct TrieNode *parent)
   node->is_word=false;
   return node;
 }
+
+
 
 void destroy_trienode(struct TrieNode *node)
 {
@@ -85,8 +88,58 @@ struct TrieNode *create_tree(FILE *file)
   return root;
 }
 
+struct FileNode * createFileNode(char *filename)
+{
+    struct FileNode *node = malloc(sizeof(struct FileNode));
+    node->filename = filename;
+    node->nextFile = NULL;
+    node->count = 1;
+
+    return node;
+}
+
+void insertFileNode(TrieNode *ptr, char *filename)
+{
+    if(ptr->fileHead == NULL) {
+        ptr->fileHead = createFileNode(filename);
+        return;
+    }
+
+    struct FileNode *filePtr = ptr->fileHead;
+    struct FileNode *prev = ptr->fileHead;
+    while(filePtr != NULL) {
+        if(strcmp(filePtr->filename, filename) == 0) {
+            filePtr->count++;
+            //Delete and reinsert
+        }
+    }
+    //if you haven't inserted yet, then make a new node, and call insert
+
+    return;
+}
+
+struct TrieNode *insertWord(TrieNode *root, char *word, char *filename)
+{
+    int wordLen = strlen(word);
+    struct TrieNode *ptr = root;
+    int i = 0;
+    char character;
+    for(i = 0; i < wordLen; i++) {
+        character = word[i]-97;
+        if(ptr->children[character] == NULL) {
+            ptr->children[character] = create_trienode(word[i], ptr);
+        }
+        ptr = ptr->children[character];
+    }
+    ptr->is_word = true;
+    //insertFileNode(ptr, filename);
+}
+
+
+
 int main(int argc, char * argv[])
 {
+    TrieNode
     FILE * index = fopen(argv[1], "w");
     TrieNode * root = create_tree(index);
 }
