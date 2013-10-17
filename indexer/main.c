@@ -24,7 +24,7 @@ int main(int argc, char * argv[])
 
    home = getenv("HOME");
    sprintf(path, "%s/sysprog", home);
-   ftw("test", writeDirectoriesToFile, 7);
+   ftw(argv[1], writeDirectoriesToFile, 7);
 
    FILE * index = fopen(argv[1], "r");
 
