@@ -15,7 +15,8 @@ int main(int argc, char * argv[])
 {
     remove("allFiles");//MOVE THIS TO THE END
     char path[1000], *home;
-    FILE *fp;
+    FILE *fp, *fp2;
+    char * token;
     if(argc < 2) {
         printf("Need a file to open\n");
         return 0;
@@ -37,7 +38,7 @@ int main(int argc, char * argv[])
 
     fp = fopen("allFiles", "r");
     char line[256];
-
+    char line2[256];
     while(fgets(line, sizeof(line), fp)){
         if(line[strlen(line) - 1] == '\n'){
             line[strlen(line) - 1] = '\0';
@@ -46,7 +47,17 @@ int main(int argc, char * argv[])
         if(dir != NULL){
             continue;
         }
-        printf("%s>>>>>>>>\n", line);
+        else{
+            printf("%s>>>>>>>>\n", line);
+            fp2 = fopen(line, "r");
+            while(fgets(line2, sizeof(line2), fp2)){
+                printf(">>>>>>%s\n", line2);
+                TokenizerT * tokenizer = TKCreate("", line2);
+                while((token = TKGetNextToken(tokenizer))) {
+                    printf("%s\n", token);
+                }
+            }
+        }
     }
 
     /*if(index == NULL) {
