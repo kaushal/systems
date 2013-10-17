@@ -14,7 +14,7 @@ int main(int argc, char * argv[])
         return 0;
    }
 
-   FILE * index = fopen("test", "r");
+   FILE * index = fopen(argv[1], "r");
 
    if(index == NULL) {
        fprintf(stderr, "Could not open index file %s\n", argv[1]);
