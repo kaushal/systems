@@ -5,21 +5,23 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include "sortedList.h"
 
 typedef enum {false, true} bool;
 
 typedef struct TrieNode
 {
-  char c;
+  char character;
   struct TrieNode *parent;
   struct TrieNode **children;
   bool is_word;
+  struct FileNode *fileHead;
 } TrieNode;
 
 struct TrieNode *create_trienode(char c, struct TrieNode *parent)
 {
   struct TrieNode *node = malloc(sizeof(struct TrieNode));
-  node->c = c;
+  node->character = c;
   node->parent = parent;
   node->children = malloc(26*sizeof(struct TrieNode));
   node->is_word=false;
