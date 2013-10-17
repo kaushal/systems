@@ -4,19 +4,31 @@
 #include <dirent.h>
 #include <errno.h>
 
+#include <ftw.h>
+#include <signal.h>
+
 #include "tokenizer.h"
+
+int writeDirectoriesToFile(const char *, const struct stat *, int);
 
 int main(int argc, char * argv[])
 {
+  char path[1000], *home;
 
    if(argc < 2) {
         printf("Need a file to open\n");
         return 0;
    }
 
+
+
+   home = getenv("HOME");
+   sprintf(path, "%s/sysprog", home);
+   ftw("test", writeDirectoriesToFile, 7);
+
    FILE * index = fopen(argv[1], "r");
 
-   if(index == NULL) {
+   /*if(index == NULL) {
        fprintf(stderr, "Could not open index file %s\n", argv[1]);
        return 0;
    }
@@ -33,8 +45,25 @@ int main(int argc, char * argv[])
        }
    }
 
-   fclose(index);
+   fclose(index);*/
    return 0;
+}
+
+int writeDirectoriesToFile(const char *path, const struct stat *sptr, int type)
+{
+    /* Types: FTW_D = directory, FTW_F = normal file, FTW_DNR = non-traversable
+       directory.  Do a man ftw for the full scoop!!!!*/
+    FILE *fp = fopen("allFiles", "a+");
+
+    fprintf(fp, "%s\n", path);
+    if (strstr(path,"test"))
+    {
+        printf("Name = %s\n", path);
+        if (type == FTW_DNR) printf("Directory %s cannot be traversed.\n",
+                path);
+    }
+    fclose(fp);
+    return 0;
 }
 
 
