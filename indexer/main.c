@@ -73,10 +73,8 @@ int main(int argc, char * argv[])
             continue;
         }
         else{
-            //printf("%s>>>>>>>>\n", line);
             fp2 = fopen(line, "r");
             while(fgets(line2, sizeof(line2), fp2)){
-                //printf(">>>>>>%s\n", line2);
                 TokenizerT * tokenizer = TKCreate("", line2);
                 s = (struct wordHash*)malloc(sizeof(struct wordHash));
                 while((token = TKGetNextToken(tokenizer))) {
@@ -139,17 +137,24 @@ int main(int argc, char * argv[])
                         printf("\ni am here adding: ----------------------%s\n", token);
                         HASH_ADD_KEYPTR(hh, words, s->word, strlen(s->word), s);
                     }
-                    //printf("%s\n", token);
                 }
             }
         }
     }
+    printf("--------------------------------------------------------------------\n");
+
     HASH_SRT(hh, words, sort_by_name);
     struct wordHash *j;
 
     //Prints in order
     for(j= words; j != NULL; j=j->hh.next) {
-        printf("word is %s\n", j->word);
+        printf("%s --> ", j->word);
+        listNode *current = j->head;
+        while(current != NULL) {
+            printf("(%s , %d)", current->fileName, current->count);
+            current = current->next;
+        }
+        printf("\n");
     }
 
     //Free Hash Table
