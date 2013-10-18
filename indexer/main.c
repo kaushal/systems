@@ -54,6 +54,7 @@ int main(int argc, char * argv[])
     char line[256];
     char line2[256];
     UT_hash_handle hh;
+    UT_hash_handle hhh;
     while(fgets(line, sizeof(line), fp)){
         if(line[strlen(line) - 1] == '\n'){
             line[strlen(line) - 1] = '\0';
@@ -75,6 +76,9 @@ int main(int argc, char * argv[])
                     s2->count = 5;
 
                     s = (struct wordHash*)malloc(sizeof(struct wordHash));
+                    HASH_FIND_STR(words, "token", s);
+
+
                     s->word = token;
                     s->fhash = s2;
                     HASH_ADD_KEYPTR(hh, words, s->word, strlen(s->word), s);
