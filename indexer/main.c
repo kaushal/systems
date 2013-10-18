@@ -6,10 +6,21 @@
 #include <sys/stat.h>
 #include <ftw.h>
 #include <signal.h>
-
+#include "uthash.h"
 #include "tokenizer.h"
 
 int writeDirectoriesToFile(const char *, const struct stat *, int);
+
+struct fileHash {
+    const char* filePath;
+    int count;
+};
+
+struct wordHash {
+    const char* word;
+    struct fileHash *fhash;
+    UT_hash_handle hh;
+};
 
 int main(int argc, char * argv[])
 {
@@ -17,6 +28,8 @@ int main(int argc, char * argv[])
     char path[1000], *home;
     FILE *fp, *fp2;
     char * token;
+    struct wordHash *s, *tmp, *words = NULL;
+    struct fileHash *s2, *tmp2, *files = NULL;
     if(argc < 2) {
         printf("Need a file to open\n");
         return 0;
@@ -40,6 +53,7 @@ int main(int argc, char * argv[])
     fp = fopen("allFiles", "r");
     char line[256];
     char line2[256];
+    UT_hash_handle hh;
     while(fgets(line, sizeof(line), fp)){
         if(line[strlen(line) - 1] == '\n'){
             line[strlen(line) - 1] = '\0';
@@ -55,30 +69,20 @@ int main(int argc, char * argv[])
                 printf(">>>>>>%s\n", line2);
                 TokenizerT * tokenizer = TKCreate("", line2);
                 while((token = TKGetNextToken(tokenizer))) {
+
+                    s2 = (struct fileHash*)malloc(sizeof(struct fileHash));
+                    s2->filePath = line;
+                    s2->count = 5;
+
+                    s = (struct wordHash*)malloc(sizeof(struct wordHash));
+                    s->word = token;
+                    s->fhash = s2;
+                    HASH_ADD_KEYPTR(hh, words, s->word, strlen(s->word), s);
                     printf("%s\n", token);
                 }
             }
         }
     }
-
-    /*if(index == NULL) {
-      fprintf(stderr, "Could not open index file %s\n", argv[1]);
-      return 0;
-      }
-
-      char * lineptr = NULL;
-      size_t lineSize = 0;
-      ssize_t read;
-      char * token;
-
-      while( (read = getline(&lineptr, &lineSize, index)) != -1) {
-      TokenizerT * tokenizer = TKCreate("", lineptr);
-      while((token = TKGetNextToken(tokenizer))) {
-      printf("%s\n", token);
-      }
-      }
-
-      fclose(index);*/
     return 0;
 }
 
@@ -99,21 +103,3 @@ int writeDirectoriesToFile(const char *path, const struct stat *sptr, int type)
     return 0;
 }
 
-
-/*
- *
- DIR * dir;
- struct dirent * entry;
- extern int errno;
-
- if ( (dir = opendir(argv[1])) == 0) {
- printf("Could not open %s as directory: %s\n", argv[1], strerror(errno));
- }
- else {
- while( (entry = readdir(dir)) != 0)
- {
- printf("%s\n", entry->d_name);
- }
- closedir(dir);
- }
- */
