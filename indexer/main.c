@@ -26,6 +26,9 @@ struct wordHash {
     struct listNode *head;
 };
 
+int sort_by_name(struct wordHash *a, struct wordHash *b) {
+  return strcmp(a->word, b->word);
+}
 
 int main(int argc, char * argv[])
 {
@@ -123,6 +126,13 @@ int main(int argc, char * argv[])
             }
         }
     }
+    HASH_SRT(hh, words, sort_by_name);
+    struct wordHash *j;
+
+    for(j= words; j != NULL; j=j->hh.next) {
+        printf("word is %s\n", j->word);
+    }
+
     return 0;
 }
 
