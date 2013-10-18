@@ -80,27 +80,44 @@ int main(int argc, char * argv[])
                     HASH_FIND_STR(words, token, tmp);
                     if(tmp){
                         printf("\ni am here adding: %s\n", token);
-                        listNode *temp;
-                        temp = tmp->head;
+                        listNode *current, *previous, *tempNode;
+                        current = tmp->head;
+                        previous = current;
                         int added = 0;
-                        while(temp != NULL){
-                            if(strcmp(temp->fileName, line) == 0){
-                                printf("\nfile name: %s\n", temp->fileName);
-                                temp->count++;
+                        while(current != NULL){
+                            if(strcmp(current->fileName, (char*)line) == 0){
+                                printf("\nfile name: %s\n", current->fileName);
+                                printf("\nfile name: %s\n", line);
+                                current->count++;
                                 added = 1;
-                                printf("_______%d-----------\n", temp->count);
+                                printf("_______%d-----------\n", current ->count);
+                                if(current->next != NULL ){
+                                    while(current != NULL && current->count > current->next->count){
+                                        tempNode = current->next;
+                                        current->next = tempNode->next;
+                                        tempNode->next = current;
+                                        if(previous == tmp->head) {
+                                            tmp->head = tempNode;
+                                        }
+                                        previous = current;
+                                        current = current->next;
+                                    }
+                                }
                                 break;
                             }
-                            temp = temp->next;
+                            previous = current;
+                            current = current->next;
                         }
                         if(added = 0){
                             listNode *l1 = malloc(sizeof(listNode));
-                            l1->fileName = line;
+                            l1->fileName = malloc(sizeof(line));
+                            strcpy(l1->fileName, line);
                             l1->count = 1;
                             l1->next = NULL;
-                            temp->next = l1;
-                            temp = temp->next;
-                            printf("_______%d-----------\n", temp->count);
+                            current->next = l1;
+                            l1->next = NULL;
+                            current = current->next;
+                            printf("_______%d---===========--------\n", current->count);
                         }
                     }
                     else{
@@ -109,13 +126,14 @@ int main(int argc, char * argv[])
                         s->word = token;
 
                         listNode *l1 = malloc(sizeof(listNode));
-                        l1->fileName = line;
+                        l1->fileName = malloc(sizeof(line));
+                        strcpy(l1->fileName, line);
                         l1->count = 1;
                         l1->next = NULL;
                         s->head = l1;
 
                         //make inner
-                        printf("\ni am here adding: %s\n", token);
+                        printf("\ni am here adding: ----------------------%s\n", token);
                         HASH_ADD_KEYPTR(hh, words, s->word, strlen(s->word), s);
                     }
                     //printf("%s\n", token);
