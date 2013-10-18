@@ -50,6 +50,7 @@ int main(int argc, char * argv[])
         printf("------------NULL-----------");
         fp = fopen("allFiles", "a+");
         fprintf(fp, "%s\n", argv[1]);
+        fclose(fp);
     }
     else{
         home = getenv("HOME");
