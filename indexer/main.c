@@ -14,6 +14,7 @@ int writeDirectoriesToFile(const char *, const struct stat *, int);
 struct fileHash {
     const char* filePath;
     int count;
+    UT_hash_handle hh;
 };
 
 struct wordHash {
@@ -64,25 +65,50 @@ int main(int argc, char * argv[])
             continue;
         }
         else{
-            printf("%s>>>>>>>>\n", line);
+            //printf("%s>>>>>>>>\n", line);
             fp2 = fopen(line, "r");
             while(fgets(line2, sizeof(line2), fp2)){
-                printf(">>>>>>%s\n", line2);
+                //printf(">>>>>>%s\n", line2);
                 TokenizerT * tokenizer = TKCreate("", line2);
+                s = (struct wordHash*)malloc(sizeof(struct wordHash));
                 while((token = TKGetNextToken(tokenizer))) {
 
-                    s2 = (struct fileHash*)malloc(sizeof(struct fileHash));
-                    s2->filePath = line;
-                    s2->count = 5;
+                    HASH_FIND_STR(words, token, tmp);
+                    if(tmp){//if we've seen the word before
 
-                    s = (struct wordHash*)malloc(sizeof(struct wordHash));
-                    HASH_FIND_STR(words, "token", s);
+                        /*printf("found: ");
+                        printf("%s\n", token);
+                        s2 = (struct fileHash*)malloc(sizeof(struct fileHash));
+                        HASH_FIND_STR(s->fhash, line, tmp2);
+                        if(tmp2){//it appeared before in the file
+                            printf("%s\n", line);
+                            tmp2->count = tmp2->count;
+                            printf("%d\n", tmp2->count);
+                        }
+                        else{//first time we're seeing it in this file
+                            s2 = (struct fileHash*)malloc(sizeof(struct fileHash));
+                            s2->filePath = line;
+                            s2->count = 1;
+                            tmp->fhash = s2;
+                            printf("%d\n", s2->count);
+                        }*/
+                    }
+                    else{
+                        s = (struct wordHash*)malloc(sizeof(struct wordHash));
+                        //add to outer
+                        s->word = token;
 
-
-                    s->word = token;
-                    s->fhash = s2;
-                    HASH_ADD_KEYPTR(hh, words, s->word, strlen(s->word), s);
-                    printf("%s\n", token);
+                        //make inner
+                        s2 = (struct fileHash*)malloc(sizeof(struct fileHash));
+                        s->fhash = (struct fileHash*)malloc(sizeof(struct fileHash));
+                        s2->filePath = line;
+                        s2->count = 1;
+                        printf("\ni am here adding: %s\n", token);
+                        s->fhash = s2;
+                        HASH_ADD_KEYPTR(hh, files, s2->filePath, strlen(s2->filePath), s2);
+                        HASH_ADD_KEYPTR(hh, words, s->word, strlen(s->word), s);
+                    }
+                    //printf("%s\n", token);
                 }
             }
         }
@@ -99,7 +125,6 @@ int writeDirectoriesToFile(const char *path, const struct stat *sptr, int type)
     fprintf(fp, "%s\n", path);
     if (strstr(path,"test"))
     {
-        printf("Name = %s\n", path);
         if (type == FTW_DNR) printf("Directory %s cannot be traversed.\n",
                 path);
     }
