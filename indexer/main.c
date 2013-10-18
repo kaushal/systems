@@ -117,7 +117,9 @@ int main(int argc, char * argv[])
                             l1->count = 1;
                             l1->next = NULL;
                             previous->next = l1;
-                            l1->next = NULL;
+                            /*tempNode = tmp->head;
+                            tmp->head = l1;
+                            l1->next = tempNode;*/
                             printf("_______%d---===========--------\n", l1->count);
                         }
                     }
@@ -147,12 +149,35 @@ int main(int argc, char * argv[])
     struct wordHash *j;
 
     //Prints in order
+    char *tempFileName;
+    int maxCount = 0;
     for(j= words; j != NULL; j=j->hh.next) {
         printf("%s --> ", j->word);
-        listNode *current = j->head;
-        while(current != NULL) {
-            printf("(%s , %d)", current->fileName, current->count);
-            current = current->next;
+        listNode *current = j->head, *head = j->head, *tempFileNode, *tempFileNodePrev, *prev;
+        prev = current;
+        while(j->head != NULL) {
+            int maxCount = 0;
+            while(current != NULL){
+                if(current->count > maxCount){
+                    maxCount = current->count;
+                    tempFileName = current->fileName;
+                    tempFileNodePrev = prev;
+                    tempFileNode = current;
+                }
+                prev = current;
+                current = current->next;
+            }
+
+            if(tempFileNode == j->head){
+                j->head = tempFileNode->next;
+            }
+            else{
+                tempFileNodePrev->next = tempFileNode->next;
+            }
+            current = j->head;
+            prev = current;
+            printf("(%s , %d), ", tempFileName, maxCount);
+            //delete the node
         }
         printf("\n");
     }
