@@ -9,19 +9,26 @@
 #include "uthash.h"
 #include "tokenizer.h"
 
+#define BUFLEN 20
+
 int writeDirectoriesToFile(const char *, const struct stat *, int);
 
-struct fileHash {
-    const char* filePath;
-    int count;
+typedef struct el {
+    char bname[BUFLEN];
+    struct el *next, *prev;
+} el;
+
+struct wordHash {
+    const char *word;
+    struct el *sortedList;
     UT_hash_handle hh;
 };
 
-struct wordHash {
-    const char* word;
-    struct fileHash *fhash;
-    UT_hash_handle hh;
-};
+int namecmp(el *a, el *b) {
+    return strcmp(a->bname,b->bname);
+}
+
+el *head = NULL; /* important- initialize to NULL! */
 
 int main(int argc, char * argv[])
 {
@@ -30,7 +37,8 @@ int main(int argc, char * argv[])
     FILE *fp, *fp2;
     char * token;
     struct wordHash *s, *tmp, *words = NULL;
-    struct fileHash *s2, *tmp2, *files = NULL;
+    el *name, *elt, *tmpList, etmp;
+
     if(argc < 2) {
         printf("Need a file to open\n");
         return 0;
@@ -74,24 +82,8 @@ int main(int argc, char * argv[])
                 while((token = TKGetNextToken(tokenizer))) {
 
                     HASH_FIND_STR(words, token, tmp);
-                    if(tmp){//if we've seen the word before
+                    if(tmp){
 
-                        /*printf("found: ");
-                        printf("%s\n", token);
-                        s2 = (struct fileHash*)malloc(sizeof(struct fileHash));
-                        HASH_FIND_STR(s->fhash, line, tmp2);
-                        if(tmp2){//it appeared before in the file
-                            printf("%s\n", line);
-                            tmp2->count = tmp2->count;
-                            printf("%d\n", tmp2->count);
-                        }
-                        else{//first time we're seeing it in this file
-                            s2 = (struct fileHash*)malloc(sizeof(struct fileHash));
-                            s2->filePath = line;
-                            s2->count = 1;
-                            tmp->fhash = s2;
-                            printf("%d\n", s2->count);
-                        }*/
                     }
                     else{
                         s = (struct wordHash*)malloc(sizeof(struct wordHash));
@@ -99,13 +91,7 @@ int main(int argc, char * argv[])
                         s->word = token;
 
                         //make inner
-                        s2 = (struct fileHash*)malloc(sizeof(struct fileHash));
-                        s->fhash = (struct fileHash*)malloc(sizeof(struct fileHash));
-                        s2->filePath = line;
-                        s2->count = 1;
                         printf("\ni am here adding: %s\n", token);
-                        s->fhash = s2;
-                        HASH_ADD_KEYPTR(hh, files, s2->filePath, strlen(s2->filePath), s2);
                         HASH_ADD_KEYPTR(hh, words, s->word, strlen(s->word), s);
                     }
                     //printf("%s\n", token);
