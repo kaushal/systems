@@ -111,16 +111,15 @@ int main(int argc, char * argv[])
                             previous = current;
                             current = current->next;
                         }
-                        if(added = 0){
+                        if(added == 0){
                             listNode *l1 = malloc(sizeof(listNode));
                             l1->fileName = malloc(sizeof(line));
                             strcpy(l1->fileName, line);
                             l1->count = 1;
                             l1->next = NULL;
-                            current->next = l1;
+                            previous->next = l1;
                             l1->next = NULL;
-                            current = current->next;
-                            printf("_______%d---===========--------\n", current->count);
+                            printf("_______%d---===========--------\n", l1->count);
                         }
                     }
                     else{
