@@ -129,8 +129,17 @@ int main(int argc, char * argv[])
     HASH_SRT(hh, words, sort_by_name);
     struct wordHash *j;
 
+    //Prints in order
     for(j= words; j != NULL; j=j->hh.next) {
         printf("word is %s\n", j->word);
+    }
+
+    //Free Hash Table
+    struct wordHash *current, *next;
+
+    HASH_ITER(hh, words, current, next) {
+        HASH_DEL(words, current);
+        free(current);
     }
 
     return 0;
