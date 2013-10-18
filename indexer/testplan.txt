@@ -1,0 +1,16 @@
+The plan to test this program is as follows: 
+
+First, test on a single file. Make sure all the words are correctly counted.
+
+Then give it a directory with multiple files in it. 
+
+Make sure the words are counted correctly and the output is printed correctly.
+
+We have supplied 3 directories, and a file called test.txt to test with. 
+
+The directories are: 
+test1/
+test2/
+test3/
+
+
