@@ -30,11 +30,19 @@ int sort_by_name(struct wordHash *a, struct wordHash *b) {
   return strcmp(a->word, b->word);
 }
 
+void toLowerCase(char *word)
+{
+    int i;
+    for(i=0; i<strlen(word); i++) {
+        word[i] = tolower(word[i]);
+    }
+}
+
 int main(int argc, char * argv[])
 {
     remove("allFiles");//MOVE THIS TO THE END
     char path[1000], *home;
-    FILE *fp, *fp2;
+    FILE *fp, *fp2, *fp3;
     char * token;
     struct wordHash *s, *tmp, *words = NULL;
 
@@ -42,19 +50,21 @@ int main(int argc, char * argv[])
         printf("Need a file to open\n");
         return 0;
     }
-    //TODO: lowercase eveything
 
     DIR *dir;
     dir = opendir(argv[1]);
     if(dir == NULL){
-        printf("------------NULL-----------");
+        fp3 = fopen(argv[1], "r");
+        if(!fp3) {
+            printf("Not a valid file or directory\n");
+            return 1;
+        }
         fp = fopen("allFiles", "a+");
         fprintf(fp, "%s\n", argv[1]);
         fclose(fp);
     }
     else{
         home = getenv("HOME");
-        printf("%s------------------%s-------------\n", path, home);
         printf(path, "%s/sysprog", home);
         ftw(argv[1], writeDirectoriesToFile, 7);
     }
@@ -62,8 +72,6 @@ int main(int argc, char * argv[])
     fp = fopen("allFiles", "r");
     char line[256];
     char line2[256];
-    UT_hash_handle hh;
-    UT_hash_handle hhh;
     while(fgets(line, sizeof(line), fp)){
         if(line[strlen(line) - 1] == '\n'){
             line[strlen(line) - 1] = '\0';
@@ -78,21 +86,17 @@ int main(int argc, char * argv[])
                 TokenizerT * tokenizer = TKCreate("", line2);
                 s = (struct wordHash*)malloc(sizeof(struct wordHash));
                 while((token = TKGetNextToken(tokenizer))) {
-
+                    toLowerCase(token);
                     HASH_FIND_STR(words, token, tmp);
                     if(tmp){
-                        printf("\ni am here adding: %s\n", token);
                         listNode *current, *previous, *tempNode;
                         current = tmp->head;
                         previous = current;
                         int added = 0;
                         while(current != NULL){
                             if(strcmp(current->fileName, (char*)line) == 0){
-                                printf("\nfile name: %s\n", current->fileName);
-                                printf("\nfile name: %s\n", line);
                                 current->count++;
                                 added = 1;
-                                printf("_______%d-----------\n", current ->count);
                                 if(current->next != NULL ){
                                     while(current != NULL && current->count > current->next->count){
                                         tempNode = current->next;
@@ -117,10 +121,6 @@ int main(int argc, char * argv[])
                             l1->count = 1;
                             l1->next = NULL;
                             previous->next = l1;
-                            /*tempNode = tmp->head;
-                            tmp->head = l1;
-                            l1->next = tempNode;*/
-                            printf("_______%d---===========--------\n", l1->count);
                         }
                     }
                     else{
@@ -136,24 +136,21 @@ int main(int argc, char * argv[])
                         s->head = l1;
 
                         //make inner
-                        printf("\ni am here adding: ----------------------%s\n", token);
                         HASH_ADD_KEYPTR(hh, words, s->word, strlen(s->word), s);
                     }
                 }
             }
         }
     }
-    printf("--------------------------------------------------------------------\n");
 
     HASH_SRT(hh, words, sort_by_name);
     struct wordHash *j;
 
     //Prints in order
     char *tempFileName;
-    int maxCount = 0;
     for(j= words; j != NULL; j=j->hh.next) {
         printf("%s --> ", j->word);
-        listNode *current = j->head, *head = j->head, *tempFileNode, *tempFileNodePrev, *prev;
+        listNode *current = j->head, *tempFileNode, *tempFileNodePrev, *prev;
         prev = current;
         while(j->head != NULL) {
             int maxCount = 0;
