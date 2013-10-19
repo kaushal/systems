@@ -40,33 +40,33 @@ void toLowerCase(char *word)
 
 int main(int argc, char * argv[])
 {
-    remove("allFiles");//MOVE THIS TO THE END
     char path[1000], *home;
     FILE *fp, *fp2, *fp3;
+    FILE *fileDest = fopen(argv[1], "w");
     char * token;
     struct wordHash *s, *tmp, *words = NULL;
 
-    if(argc < 2) {
-        printf("Need a file to open\n");
+    if(argc != 3) {
+        printf("USAGE: The first argument is file to be written to. The second is a file or directory to be read.\n");
         return 0;
     }
 
     DIR *dir;
-    dir = opendir(argv[1]);
+    dir = opendir(argv[2]);
     if(dir == NULL){
-        fp3 = fopen(argv[1], "r");
+        fp3 = fopen(argv[2], "r");
         if(!fp3) {
             printf("Not a valid file or directory\n");
             return 1;
         }
         fp = fopen("allFiles", "a+");
-        fprintf(fp, "%s\n", argv[1]);
+        fprintf(fp, "%s\n", argv[2]);
         fclose(fp);
     }
     else{
         home = getenv("HOME");
         printf(path, "%s/sysprog", home);
-        ftw(argv[1], writeDirectoriesToFile, 7);
+        ftw(argv[2], writeDirectoriesToFile, 7);
     }
 
     fp = fopen("allFiles", "r");
@@ -149,9 +149,10 @@ int main(int argc, char * argv[])
     //Prints in order
     char *tempFileName;
     for(j= words; j != NULL; j=j->hh.next) {
-        printf("%s --> ", j->word);
+        fprintf(fileDest, "%s --> ", j->word);
         listNode *current = j->head, *tempFileNode, *tempFileNodePrev, *prev;
         prev = current;
+        int fiveCount = 1;
         while(j->head != NULL) {
             int maxCount = 0;
             while(current != NULL){
@@ -173,10 +174,14 @@ int main(int argc, char * argv[])
             }
             current = j->head;
             prev = current;
-            printf("(%s , %d), ", tempFileName, maxCount);
+            fprintf(fileDest, "(%s , %d), ", tempFileName, maxCount);
+            if(fiveCount % 6 == 0) {
+                fprintf(fileDest, "\n");
+            }
+            fiveCount++;
             //delete the node
         }
-        printf("\n");
+        fprintf(fileDest, "\n");
     }
 
     //Free Hash Table
@@ -186,6 +191,8 @@ int main(int argc, char * argv[])
         HASH_DEL(words, current);
         free(current);
     }
+
+    remove("allFiles");//MOVE THIS TO THE END
 
     return 0;
 }
