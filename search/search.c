@@ -18,6 +18,28 @@ struct wordHash {
     UT_hash_handle hh;
 };
 
+void addToList(struct listNode *list, struct listNode *head){//this method merges head, and list together, and stores the differences at the end of head
+    listNode *current = list, *mergedCurrent = head, *newFinalList = NULL;
+    int same = 0;
+    if(current == NULL){
+        current = head;
+        return;
+    }
+    while(current != NULL){
+        same = 0;
+        while(mergedCurrent != NULL){
+            if(current->fileName == mergedCurrent->fileName){
+                same = 1;
+                continue;
+            }
+            mergedCurrent = mergedCurrent->next;
+        }
+        current = current->next;
+
+    }
+    return;
+}
+
 char *substring(char *string, int position, int length)
 {
     char *pointer;
@@ -62,7 +84,6 @@ int main(int argc, char *argv[]){
         if(line[strlen(line) - 1] == '\n'){
             line[strlen(line) -1] = '\0';
         }
-        char buff[256];
         head = NULL;
         first = 0;
         for(i = 0; i < strlen(line); i++){
@@ -81,7 +102,7 @@ int main(int argc, char *argv[]){
                     if(tempOpen != 0 && tempClose != 0 && head == NULL){//add to linked list
                         listNode *temp = malloc(sizeof(listNode));
                         temp->fileName = substring(line, tempOpen, tempClose - tempOpen);
-                        printf("first: %s\n", temp->fileName);
+                        //printf("first: %s\n", temp->fileName);
                         head = temp;
                         current = head;
                         tempOpen = 0;
@@ -91,7 +112,7 @@ int main(int argc, char *argv[]){
                     else if(tempOpen != 0 && tempClose != 0 && head != NULL){
                         listNode *temp = malloc(sizeof(listNode));
                         temp->fileName = substring(line, tempOpen, tempClose - tempOpen);
-                        printf("next: %s\n", temp->fileName);
+                        //printf("next: %s\n", temp->fileName);
                         current->next = temp;
                         current = temp;
                         tempOpen = 0;
@@ -108,5 +129,26 @@ int main(int argc, char *argv[]){
         }
 
     }
+    listNode *finalList = NULL, *currentNode = NULL;
+    char *currentWord;
+    struct wordHash *currentHash, *next, *j;
+    if(strcmp(argv[2], "so") == 0){
+        for(i = 2; i < argc; i++){
+            currentWord = argv[i];
+            for(j = wordHashMap; j != NULL; j=j->hh.next){
+                if(strcmp(j->word, currentWord) == 0){
+                    addToList(finalList, j->head);
+                }
+            }
+        }
+        return 1;
+    }
+    else if(strcmp(argv[2], "sa") == 0){
+        return 1;
+    }
+    else{
+        printf("Please enter either so or sa for your first argument.");
+    }
+
     return 0;
 }
