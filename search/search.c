@@ -18,30 +18,30 @@ struct wordHash {
     UT_hash_handle hh;
 };
 
-struct listNode *addToList(struct listNode *list, struct listNode *head){//this method merges head, and list together, and stores the differences at the end of head
+struct listNode *addToListOR(struct listNode *list, struct listNode *head){//this method merges head, and list together, and stores the differences at the end of head
     listNode *tempNode, *current = list, *mergedCurrent = head, *newFinalList = NULL;
     int same = 0;
     if(current == NULL){
         current = head;
         return current;
     }
-    while(current != NULL){
+    while(mergedCurrent != NULL){
         same = 0;
-        while(mergedCurrent != NULL){
-            if(current->fileName == mergedCurrent->fileName){
+        while(current != NULL){
+            if(strcmp(current->fileName, mergedCurrent->fileName) == 0){
                 same = 1;
-                continue;
+                break;
             }
-            mergedCurrent = mergedCurrent->next;
+            current = current->next;
         }
         tempNode = list;
         if(same == 0){
             while(tempNode->next != NULL){
                 tempNode = tempNode->next;
             }
-            tempNode->next = current;
+            tempNode->next = mergedCurrent;
         }
-        current = current->next;
+        mergedCurrent = mergedCurrent->next;
 
     }
     return list;
@@ -146,7 +146,8 @@ int main(int argc, char *argv[]){
             currentWord = argv[i];
             for(j = wordHashMap; j != NULL; j=j->hh.next){
                 if(strcmp(j->word, currentWord) == 0){
-                    finalList = addToList(finalList, j->head);
+                    finalList = addToListOR(finalList, j->head);
+                    break;
                 }
             }
         }
