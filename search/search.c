@@ -18,12 +18,12 @@ struct wordHash {
     UT_hash_handle hh;
 };
 
-void addToList(struct listNode *list, struct listNode *head){//this method merges head, and list together, and stores the differences at the end of head
-    listNode *current = list, *mergedCurrent = head, *newFinalList = NULL;
+struct listNode *addToList(struct listNode *list, struct listNode *head){//this method merges head, and list together, and stores the differences at the end of head
+    listNode *tempNode, *current = list, *mergedCurrent = head, *newFinalList = NULL;
     int same = 0;
     if(current == NULL){
         current = head;
-        return;
+        return current;
     }
     while(current != NULL){
         same = 0;
@@ -34,10 +34,17 @@ void addToList(struct listNode *list, struct listNode *head){//this method merge
             }
             mergedCurrent = mergedCurrent->next;
         }
+        tempNode = list;
+        if(same == 0){
+            while(tempNode->next != NULL){
+                tempNode = tempNode->next;
+            }
+            tempNode->next = current;
+        }
         current = current->next;
 
     }
-    return;
+    return list;
 }
 
 char *substring(char *string, int position, int length)
@@ -89,7 +96,7 @@ int main(int argc, char *argv[]){
         for(i = 0; i < strlen(line); i++){
             if(line[i] == ' ' && first == 0){
                 word = substring (line, 0, i);
-                printf("%s\n", word);
+                //printf("%s\n", word);
                 tempOpen = 0;
                 tempClose = 0;
                 for(; i < strlen(line); i++){
@@ -105,6 +112,7 @@ int main(int argc, char *argv[]){
                         //printf("first: %s\n", temp->fileName);
                         head = temp;
                         current = head;
+                        head->next = NULL;
                         tempOpen = 0;
                         tempClose = 0;
 
@@ -115,6 +123,7 @@ int main(int argc, char *argv[]){
                         //printf("next: %s\n", temp->fileName);
                         current->next = temp;
                         current = temp;
+                        temp->next = NULL;
                         tempOpen = 0;
                         tempClose = 0;
                     }
@@ -129,17 +138,22 @@ int main(int argc, char *argv[]){
         }
 
     }
-    listNode *finalList = NULL, *currentNode = NULL;
+    listNode *tempList, *finalList = NULL, *currentNode = NULL;
     char *currentWord;
     struct wordHash *currentHash, *next, *j;
     if(strcmp(argv[2], "so") == 0){
-        for(i = 2; i < argc; i++){
+        for(i = 3; i < argc; i++){
             currentWord = argv[i];
             for(j = wordHashMap; j != NULL; j=j->hh.next){
                 if(strcmp(j->word, currentWord) == 0){
-                    addToList(finalList, j->head);
+                    finalList = addToList(finalList, j->head);
                 }
             }
+        }
+        tempList = finalList;
+        while(tempList != NULL){
+            printf("%s\n", tempList->fileName);
+            tempList = tempList->next;
         }
         return 1;
     }
