@@ -22,8 +22,10 @@ struct listNode *andList(struct listNode *list1, struct listNode *list2){//this 
     listNode *tempNode, *found, *newFinalList = NULL, *list1Iter = list1, *list2Iter = list2;
     int same = 0;
 
-    if(list1 == NULL || list2 == NULL)
+    if(list1 == NULL || list2 == NULL){
+        return list1
         return NULL;
+    }
 
     //do a logical anding of the two lists
 
@@ -94,10 +96,11 @@ int main(int argc, char *argv[]){
     struct listNode *head = NULL, *current;
     struct wordHash *s, *wordHashMap= NULL;
 
-    if(argc != 2) {
+    //this doesn't make sense
+    /*if(argc != 2) {
         printf("USAGE: input index file\n");
         return 1;
-    }
+    }*/
 
     fp = fopen(argv[1], "r");
     if(!fp){
