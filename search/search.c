@@ -146,45 +146,49 @@ int main(int argc, char *argv[]){
     listNode *tempList, *finalList = NULL;
     char *currentWord;
     struct wordHash *j;
-    while(1) {
+    while(1) { //keep asking user for input
         char option[3];
         char *buffer = NULL;
         unsigned int len;
         int read;
-        char searchWords[300];   //Needs to be variable size
         printf("sa, so, or q?\n");
         scanf("%s", option);
         if(strcmp(option, "q") == 0){
             break;
         }
         printf("Enter names of the words to be searched\n");
+        //Consume the '\n' --must be a better way
         read = getline(&buffer, &len, stdin);
         read = getline(&buffer, &len, stdin);
-        if(read != -1){
-            printf("Words are: %s\n", buffer);
+        if(read == -1){
+            printf("getline failed");
+            return 1;
         }
         if(strcmp(option, "so") == 0){
-            for(i = 3; i < argc; i++){
-                currentWord = argv[i];
+            char *delim = " \n";
+            currentWord = strtok(buffer, delim);
+            printf("currentWord is %s\n", currentWord);
+            while(currentWord != NULL){
                 for(j = wordHashMap; j != NULL; j=j->hh.next){
                     if(strcmp(j->word, currentWord) == 0){
                         finalList = addToListOR(finalList, j->head);
                         break;
                     }
                 }
+                currentWord = strtok(NULL, delim);
+                printf("currentWord is %s\n", currentWord);
             }
             tempList = finalList;
             while(tempList != NULL){
                 printf("%s\n", tempList->fileName);
                 tempList = tempList->next;
             }
-            return 1;
         }
         else if(strcmp(option, "sa") == 0){
-            return 1;
+            printf("TODO\n");
         }
         else{
-            printf("Please enter either so or sa for your first argument.");
+            printf("Please enter 'so', 'sa' or 'q'\n");
         }
     }
 
