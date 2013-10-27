@@ -18,6 +18,19 @@ struct wordHash {
     UT_hash_handle hh;
 };
 
+struct listNode *andList(struct listNode *list1, struct listNode *list2){//this method merges head, and list together, and stores the differences at the end of head
+    listNode *tempNode, *found, *newFinalList = NULL, *list1Iter = list1, *list2Iter = list2;
+    int same = 0;
+
+    if(list1 == NULL || list2 == NULL)
+        return NULL;
+
+    //do a logical anding of the two lists
+
+
+    return NULL;
+}
+
 struct listNode *addToListOR(struct listNode *list, struct listNode *head){//this method merges head, and list together, and stores the differences at the end of head
     listNode *tempNode, *current = list, *mergedCurrent = head, *newFinalList = NULL;
     int same = 0;
