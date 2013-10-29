@@ -44,7 +44,7 @@ struct listNode *makeList(char *searchWord, struct wordHash *wordHashMap)
  * this method merges head, and list together,
  * and stores the differences at the end of head
  */
-struct listNode *andList(struct listNode *list1, struct listNode *list2){
+struct listNode *addToListAND(struct listNode *list1, struct listNode *list2){
     listNode *tempNode1, *found,
              *newFinalList = NULL,
              *list1Iter = list1, *list2Iter = list2;
@@ -244,19 +244,22 @@ int main(int argc, char *argv[]){
             char *delim = " \n\t";
             char *firstWord = strtok(buffer, delim);
             if(firstWord == NULL){
-                printf("Please enter a word");
+                printf("SA requires at least one word");
                 continue;
             }
             finalList = makeList(firstWord, wordHashMap);
             while(currentWord != NULL){ //Loop through user input
                 currentWord = strtok(NULL, delim);
-                for(j = wordHashMap; j != NULL; j=j->hh.next){
-                    if(strcmp(j->word, currentWord) == 0){
-                        finalList = addToListOR(finalList, j->head);
-                        break;
-                    }
-                }
+                listNode *currentList = makeList(currentWord, wordHashMap);
+                finalList = addToListAND(finalList, currentList);
             }
+            listNode *temp = finalList;
+            printf("Answer is:\n");
+            while(temp->next != NULL) {
+                printf("%s ", temp->fileName);
+                temp = temp->next;
+            }
+            printf("\n");
         }
         else{
             printf("Please enter 'so', 'sa' or 'q'\n");
