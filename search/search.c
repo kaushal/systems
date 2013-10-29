@@ -18,8 +18,29 @@ struct wordHash {
     UT_hash_handle hh;
 };
 
-struct listNode *andList(struct listNode *list1, struct listNode *list2){//this method merges head, and list together, and stores the differences at the end of head
-    listNode *tempNode, *found, *newFinalList = NULL, *list1Iter = list1, *list2Iter = list2;
+struct listNode *makeList(char *searchWord, struct wordHash *wordHashMap)
+{
+    if(searchWord == NULL || wordHashMap == NULL){
+        return NULL;
+    }
+
+    struct wordHash *j;
+    for(j = wordHashMap; j != NULL; j=j->hh.next){
+        if(strcmp(j->word, searchWord) == 0){
+            //finalList = addToListOR(finalList, j->head);
+            break;
+        }
+    }
+}
+/* Parameters: Two Linked-Lists
+ * Returns: Logical AND of lists
+ * this method merges head, and list together,
+ * and stores the differences at the end of head
+ */
+struct listNode *andList(struct listNode *list1, struct listNode *list2){
+    listNode *tempNode1, *found,
+             *newFinalList = NULL,
+             *list1Iter = list1, *list2Iter = list2;
     int same = 0;
 
     if(list1 == NULL || list2 == NULL){
@@ -27,12 +48,23 @@ struct listNode *andList(struct listNode *list1, struct listNode *list2){//this 
     }
 
     //do a logical anding of the two lists
+    while(list1Iter->next != NULL){
+        while(list2Iter->next != NULL){
+            if(strcmp(list1Iter->fileName, list2Iter->fileName) == 0) {
+                printf("found that %s == %s\n", list1Iter->fileName, list2Iter->fileName);
+            }
+        }
+
+    }
 
 
     return NULL;
 }
 
-struct listNode *addToListOR(struct listNode *list, struct listNode *head){//this method merges head, and list together, and stores the differences at the end of head
+/*this method merges head, and list together,
+ * and stores the differences at the end of head
+ */
+struct listNode *addToListOR(struct listNode *list, struct listNode *head){
     listNode *tempNode, *current = list, *mergedCurrent = head;
     int same = 0;
     if(current == NULL){
@@ -67,17 +99,16 @@ char *substring(char *string, int position, int length)
     int c;
     pointer = malloc(length+1);
 
-    if (pointer == NULL)
-    {
+    if (pointer == NULL) {
         printf("Unable to allocate memory.\n");
         exit(EXIT_FAILURE);
     }
 
-    for (c = 0 ; c < position -1 ; c++)
+    for (c = 0 ; c < position -1 ; c++) {
         string++;
+    }
 
-    for (c = 0 ; c < length ; c++)
-    {
+    for (c = 0 ; c < length ; c++){
         *(pointer+c) = *string;
         string++;
     }
@@ -115,7 +146,6 @@ int main(int argc, char *argv[]){
         for(i = 0; i < strlen(line); i++){
             if(line[i] == ' ' && first == 0){
                 word = substring (line, 0, i);
-                //printf("%s\n", word);
                 tempOpen = 0;
                 tempClose = 0;
                 for(; i < strlen(line); i++){
@@ -128,7 +158,6 @@ int main(int argc, char *argv[]){
                     if(tempOpen != 0 && tempClose != 0 && head == NULL){//add to linked list
                         listNode *temp = malloc(sizeof(listNode));
                         temp->fileName = substring(line, tempOpen, tempClose - tempOpen);
-                        //printf("first: %s\n", temp->fileName);
                         head = temp;
                         current = head;
                         head->next = NULL;
@@ -167,22 +196,23 @@ int main(int argc, char *argv[]){
         int read;
         printf("sa, so, or q?\n");
         scanf("%s", option);
+        //QUIT
         if(strcmp(option, "q") == 0){
             break;
         }
-        printf("Enter names of the words to be searched\n");
-        //Consume the '\n' --must be a better way
-        read = getline(&buffer, &len, stdin);
-        read = getline(&buffer, &len, stdin);
         if(read == -1){
             printf("getline failed");
             return 1;
         }
+        //SEARCH OR
         if(strcmp(option, "so") == 0){
+            printf("Enter names of the words to be searched\n");
+            //Consume the '\n' --must be a better way
+            read = getline(&buffer, &len, stdin);
+            read = getline(&buffer, &len, stdin);
             char *delim = " \n";
             currentWord = strtok(buffer, delim);
-            printf("currentWord is %s\n", currentWord);
-            while(currentWord != NULL){
+            while(currentWord != NULL){ //Loop through user input
                 for(j = wordHashMap; j != NULL; j=j->hh.next){
                     if(strcmp(j->word, currentWord) == 0){
                         finalList = addToListOR(finalList, j->head);
@@ -198,8 +228,25 @@ int main(int argc, char *argv[]){
                 tempList = tempList->next;
             }
         }
+        //SEARCH AND
         else if(strcmp(option, "sa") == 0){
-            printf("TODO\n");
+            printf("Enter names of the words to be searched\n");
+            //Consume the '\n' --must be a better way
+            read = getline(&buffer, &len, stdin);
+            read = getline(&buffer, &len, stdin);
+            char *delim = " \n";
+            char *firstWord = strtok(buffer, delim);
+            char *secondWord = strtok(NULL, delim);
+            printf("words are %s and %s\n", firstWord, secondWord);
+            while(currentWord != NULL){ //Loop through user input
+                currentWord = strtok(NULL, delim);
+                for(j = wordHashMap; j != NULL; j=j->hh.next){
+                    if(strcmp(j->word, currentWord) == 0){
+                        finalList = addToListOR(finalList, j->head);
+                        break;
+                    }
+                }
+            }
         }
         else{
             printf("Please enter 'so', 'sa' or 'q'\n");
