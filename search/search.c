@@ -18,6 +18,12 @@ struct wordHash {
     UT_hash_handle hh;
 };
 
+/*
+ * Parameters: target word, hashMap
+ * Returns: linked-list of target word, NULL if not found
+ *
+ * Searches for a word and returns its linked list
+ */
 struct listNode *makeList(char *searchWord, struct wordHash *wordHashMap)
 {
     if(searchWord == NULL || wordHashMap == NULL){
@@ -27,11 +33,12 @@ struct listNode *makeList(char *searchWord, struct wordHash *wordHashMap)
     struct wordHash *j;
     for(j = wordHashMap; j != NULL; j=j->hh.next){
         if(strcmp(j->word, searchWord) == 0){
-            //finalList = addToListOR(finalList, j->head);
-            break;
+            return j->head;
         }
     }
+    return NULL;
 }
+
 /* Parameters: Two Linked-Lists
  * Returns: Logical AND of lists
  * this method merges head, and list together,
@@ -210,7 +217,7 @@ int main(int argc, char *argv[]){
             //Consume the '\n' --must be a better way
             read = getline(&buffer, &len, stdin);
             read = getline(&buffer, &len, stdin);
-            char *delim = " \n";
+            char *delim = " \n\t";
             currentWord = strtok(buffer, delim);
             while(currentWord != NULL){ //Loop through user input
                 for(j = wordHashMap; j != NULL; j=j->hh.next){
@@ -234,10 +241,13 @@ int main(int argc, char *argv[]){
             //Consume the '\n' --must be a better way
             read = getline(&buffer, &len, stdin);
             read = getline(&buffer, &len, stdin);
-            char *delim = " \n";
+            char *delim = " \n\t";
             char *firstWord = strtok(buffer, delim);
-            char *secondWord = strtok(NULL, delim);
-            printf("words are %s and %s\n", firstWord, secondWord);
+            if(firstWord == NULL){
+                printf("Please enter a word");
+                continue;
+            }
+            finalList = makeList(firstWord, wordHashMap);
             while(currentWord != NULL){ //Loop through user input
                 currentWord = strtok(NULL, delim);
                 for(j = wordHashMap; j != NULL; j=j->hh.next){
