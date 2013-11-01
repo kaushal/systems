@@ -44,28 +44,33 @@ struct listNode *makeList(char *searchWord, struct wordHash *wordHashMap)
  * this method merges head, and list together,
  * and stores the differences at the end of head
  */
-struct listNode *addToListAND(struct listNode *list1, struct listNode *list2){
-    listNode *tempNode1, *found,
-             *newFinalList = NULL,
-             *list1Iter = list1, *list2Iter = list2;
-    int same = 0;
+struct listNode *addToListAND(struct listNode *list1, struct listNode *list2)
+{
+     listNode *finalList = NULL,
+              *list1Iter = list1,
+              *list2Iter = list2;
 
+    // V not sure if we want to do this V
     if(list1 == NULL || list2 == NULL){
         return NULL;
     }
 
     //do a logical anding of the two lists
-    while(list1Iter->next != NULL){
-        while(list2Iter->next != NULL){
+    while(list1Iter != NULL){
+        while(list2Iter != NULL){
             if(strcmp(list1Iter->fileName, list2Iter->fileName) == 0) {
-                printf("found that %s == %s\n", list1Iter->fileName, list2Iter->fileName);
+                listNode *finalListHead = malloc(sizeof(listNode));
+                finalListHead->fileName = list1Iter->fileName;
+                finalListHead->count = list1Iter->count;
+                finalListHead->next = finalList;
+                finalList = finalListHead;
             }
+            list2Iter = list2Iter->next;
         }
-
+        list1Iter = list1Iter->next;
+        list2Iter = list2;
     }
-
-
-    return NULL;
+    return finalList;
 }
 
 /*this method merges head, and list together,
@@ -243,19 +248,21 @@ int main(int argc, char *argv[]){
             read = getline(&buffer, &len, stdin);
             char *delim = " \n\t";
             char *firstWord = strtok(buffer, delim);
+            //This is an option that we may want to change
             if(firstWord == NULL){
                 printf("SA requires at least one word");
                 continue;
             }
             finalList = makeList(firstWord, wordHashMap);
+            currentWord = strtok(NULL, delim);
             while(currentWord != NULL){ //Loop through user input
-                currentWord = strtok(NULL, delim);
                 listNode *currentList = makeList(currentWord, wordHashMap);
                 finalList = addToListAND(finalList, currentList);
+                currentWord = strtok(NULL, delim);
             }
             listNode *temp = finalList;
             printf("Answer is:\n");
-            while(temp->next != NULL) {
+            while(temp != NULL) {
                 printf("%s ", temp->fileName);
                 temp = temp->next;
             }
