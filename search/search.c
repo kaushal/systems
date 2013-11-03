@@ -232,7 +232,6 @@ int main(int argc, char *argv[]){
                     }
                 }
                 currentWord = strtok(NULL, delim);
-                printf("currentWord is %s\n", currentWord);
             }
             tempList = finalList;
             while(tempList != NULL){
@@ -250,7 +249,7 @@ int main(int argc, char *argv[]){
             char *firstWord = strtok(buffer, delim);
             //This is an option that we may want to change
             if(firstWord == NULL){
-                printf("SA requires at least one word");
+                printf("SA requires at least one word\n");
                 continue;
             }
             finalList = makeList(firstWord, wordHashMap);
