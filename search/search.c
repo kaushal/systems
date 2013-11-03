@@ -198,7 +198,7 @@ int main(int argc, char *argv[]){
         }
 
     }
-    listNode *tempList, *finalList = NULL;
+    listNode *tempList;
     char *currentWord;
     struct wordHash *j;
     while(1) { //keep asking user for input
@@ -218,6 +218,7 @@ int main(int argc, char *argv[]){
         }
         //SEARCH OR
         if(strcmp(option, "so") == 0){
+            listNode *finalList = NULL;
             printf("Enter names of the words to be searched\n");
             //Consume the '\n' --must be a better way
             read = getline(&buffer, &len, stdin);
@@ -238,9 +239,11 @@ int main(int argc, char *argv[]){
                 printf("%s\n", tempList->fileName);
                 tempList = tempList->next;
             }
+            //TODO FREE MEMORY
         }
         //SEARCH AND
         else if(strcmp(option, "sa") == 0){
+            listNode *finalList = NULL;
             printf("Enter names of the words to be searched\n");
             //Consume the '\n' --must be a better way
             read = getline(&buffer, &len, stdin);
@@ -266,6 +269,7 @@ int main(int argc, char *argv[]){
                 temp = temp->next;
             }
             printf("\n");
+            //TODO FREE MEMORY
         }
         else{
             printf("Please enter 'so', 'sa' or 'q'\n");
