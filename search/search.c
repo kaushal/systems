@@ -103,7 +103,7 @@ struct listNode *addToListOR(struct listNode *list, struct listNode *head){
             tempNode->next = temp;
         }
         mergedCurrent = mergedCurrent->next;
-
+        current = list;
     }
     return list;
 }
