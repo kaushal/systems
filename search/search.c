@@ -97,7 +97,10 @@ struct listNode *addToListOR(struct listNode *list, struct listNode *head){
             while(tempNode->next != NULL){
                 tempNode = tempNode->next;
             }
-            tempNode->next = mergedCurrent;
+            listNode *temp = malloc(sizeof(listNode));
+            temp->fileName = mergedCurrent->fileName;
+            temp->next = NULL;
+            tempNode->next = temp;
         }
         mergedCurrent = mergedCurrent->next;
 
@@ -217,7 +220,7 @@ int main(int argc, char *argv[]){
             return 1;
         }
         //SEARCH OR
-        if(strcmp(option, "so") == 0){
+        if(strcmp(option, "so") == 0){//it seems to break when the last word is the only word that exists in the list, this is because current word ins't updated in this case, and it tries infinitely to add it to it's own list
             listNode *finalList = NULL;
             printf("Enter names of the words to be searched\n");
             //Consume the '\n' --must be a better way
@@ -229,7 +232,6 @@ int main(int argc, char *argv[]){
                 for(j = wordHashMap; j != NULL; j=j->hh.next){
                     if(strcmp(j->word, currentWord) == 0){
                         finalList = addToListOR(finalList, j->head);
-                        break;
                     }
                 }
                 currentWord = strtok(NULL, delim);
