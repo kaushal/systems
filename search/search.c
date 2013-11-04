@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dirent.h>
-#include <errno.h>
-#include <sys/stat.h>
 #include "uthash.h"
 
 typedef struct listNode {
@@ -17,7 +14,13 @@ struct wordHash {
     char *word;
     UT_hash_handle hh;
 };
-//frees a linked list in place
+
+/*
+ * Parameters: listnode list
+ * Returns: void
+ *
+ * Iterates and frees a linked list
+ */
 void freeList(struct listNode *list){
     struct listNode *temp = list;
     while(list != NULL){
@@ -51,8 +54,8 @@ struct listNode *makeList(char *searchWord, struct wordHash *wordHashMap)
 
 /* Parameters: Two Linked-Lists
  * Returns: Logical AND of lists
- * this method merges head, and list together,
- * and stores the differences at the end of head
+ *
+ * Compares two LL and returns LL of their common elements
  */
 struct listNode *addToListAND(struct listNode *list1, struct listNode *list2)
 {
@@ -83,8 +86,10 @@ struct listNode *addToListAND(struct listNode *list1, struct listNode *list2)
     return finalList;
 }
 
-/*this method merges head, and list together,
- * and stores the differences at the end of head
+/* Parameters: Two Linked-Lists
+ * Returns: listNode LL head
+ *
+ * Function takes the OR of two linked-lists
  */
 struct listNode *addToListOR(struct listNode *list, struct listNode *head){
     listNode *tempNode, *current = list, *mergedCurrent = head;
@@ -117,7 +122,9 @@ struct listNode *addToListOR(struct listNode *list, struct listNode *head){
     }
     return list;
 }
-
+/* Substring method
+ * from; http://www.programmingsimplified.com/c/source-code/c-substring
+ */
 char *substring(char *string, int position, int length)
 {
     char *pointer;
@@ -133,7 +140,7 @@ char *substring(char *string, int position, int length)
         string++;
     }
 
-    for (c = 0 ; c < length ; c++){
+    for (c = 0 ; c < length ; c++) {
         *(pointer+c) = *string;
         string++;
     }
@@ -193,7 +200,6 @@ int main(int argc, char *argv[]){
                     else if(tempOpen != 0 && tempClose != 0 && head != NULL){
                         listNode *temp = malloc(sizeof(listNode));
                         temp->fileName = substring(line, tempOpen, tempClose - tempOpen);
-                        //printf("next: %s\n", temp->fileName);
                         current->next = temp;
                         current = temp;
                         temp->next = NULL;
@@ -240,7 +246,7 @@ int main(int argc, char *argv[]){
             return 1;
         }
         //SEARCH OR
-        if(strcmp(option, "so") == 0){//it seems to break when the last word is the only word that exists in the list, this is because current word ins't updated in this case, and it tries infinitely to add it to it's own list
+        if(strcmp(option, "so") == 0){
             listNode *finalList = NULL;
         printf("Enter names of the words to be searched\n");
             //Consume the '\n' --must be a better way
@@ -261,7 +267,6 @@ int main(int argc, char *argv[]){
                 printf("%s\n", tempList->fileName);
                 tempList = tempList->next;
             }
-            //TODO FREE MEMORY
             freeList(finalList);
         }
         //SEARCH AND
@@ -288,17 +293,15 @@ int main(int argc, char *argv[]){
             listNode *temp = finalList;
             printf("Answer is:\n");
             while(temp != NULL) {
-                printf("%s ", temp->fileName);
+                printf("%s\n", temp->fileName);
                 temp = temp->next;
             }
-            printf("\n");
-            //TODO FREE MEMORY
+
             freeList(finalList);
         }
         else{
             printf("Please enter 'so', 'sa' or 'q'\n");
         }
     }
-
     return 0;
 }
