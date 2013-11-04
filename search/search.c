@@ -18,6 +18,15 @@ struct wordHash {
     UT_hash_handle hh;
 };
 
+void freeList(struct listNode *list){//frees a linked list in place
+    struct listNode *temp = list;
+    while(list != NULL){
+        list = temp->next;
+        free(temp);
+        temp = list;
+    }
+}
+
 /*
  * Parameters: target word, hashMap
  * Returns: linked-list of target word, NULL if not found
@@ -201,6 +210,7 @@ int main(int argc, char *argv[]){
     listNode *tempList;
     char *currentWord;
     struct wordHash *j;
+    listNode *finalList = NULL;
     while(1) { //keep asking user for input
         char option[3];
         char *buffer = NULL;
@@ -210,6 +220,7 @@ int main(int argc, char *argv[]){
         scanf("%s", option);
         //QUIT
         if(strcmp(option, "q") == 0){
+            freeList(finalList);
             break;
         }
         if(read == -1){
@@ -218,7 +229,7 @@ int main(int argc, char *argv[]){
         }
         //SEARCH OR
         if(strcmp(option, "so") == 0){
-            listNode *finalList = NULL;
+            finalList = NULL;
             printf("Enter names of the words to be searched\n");
             //Consume the '\n' --must be a better way
             read = getline(&buffer, &len, stdin);
@@ -243,7 +254,7 @@ int main(int argc, char *argv[]){
         }
         //SEARCH AND
         else if(strcmp(option, "sa") == 0){
-            listNode *finalList = NULL;
+            finalList = NULL;
             printf("Enter names of the words to be searched\n");
             //Consume the '\n' --must be a better way
             read = getline(&buffer, &len, stdin);
