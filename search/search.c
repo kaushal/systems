@@ -14,14 +14,15 @@ typedef struct listNode {
 
 struct wordHash {
     struct listNode *head;
-    const char *word;
+    char *word;
     UT_hash_handle hh;
 };
-
-void freeList(struct listNode *list){//frees a linked list in place
+//frees a linked list in place
+void freeList(struct listNode *list){
     struct listNode *temp = list;
     while(list != NULL){
         list = temp->next;
+        free(temp->fileName);
         free(temp);
         temp = list;
     }
@@ -213,17 +214,25 @@ int main(int argc, char *argv[]){
     listNode *tempList;
     char *currentWord;
     struct wordHash *j;
+    char option[3];
+    char *buffer = NULL;
+    unsigned int len;
+    int read;
+
     listNode *finalList = NULL;
     while(1) { //keep asking user for input
-        char option[3];
-        char *buffer = NULL;
-        unsigned int len;
-        int read;
         printf("sa, so, or q?\n");
         scanf("%s", option);
         //QUIT
         if(strcmp(option, "q") == 0){
             freeList(finalList);
+            struct wordHash *current, *next;
+            HASH_ITER(hh, wordHashMap, current, next){
+                HASH_DEL(wordHashMap, current);
+                freeList(current->head);
+                free(current->word);
+                free(current);
+            }
             break;
         }
         if(read == -1){
@@ -253,6 +262,7 @@ int main(int argc, char *argv[]){
                 tempList = tempList->next;
             }
             //TODO FREE MEMORY
+            freeList(finalList);
         }
         //SEARCH AND
         else if(strcmp(option, "sa") == 0){
@@ -283,6 +293,7 @@ int main(int argc, char *argv[]){
             }
             printf("\n");
             //TODO FREE MEMORY
+            freeList(finalList);
         }
         else{
             printf("Please enter 'so', 'sa' or 'q'\n");
