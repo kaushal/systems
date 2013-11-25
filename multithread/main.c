@@ -35,7 +35,11 @@ struct Queue *queueHashTable = NULL;
 struct customer * makeCustomer(char *line);
 void addCustomer(struct customer *cInfo);
 char ** processCategories(char * categories);
+<<<<<<< HEAD
 void * producer(void *arg);
+=======
+struct Queue * lookupQueue(char * category);
+>>>>>>> 54590a3c9c7c7250ad843d7669e83a1fbf1ba1eb
 
 int main(int argc, char * argv[])
 {
@@ -43,8 +47,7 @@ int main(int argc, char * argv[])
     if(argc != 4) {
         printf("USAGE: The first argument is the name of the database input file\n");
         printf("The second is the name of the book order input file.\n");
-        printf("The third is the list of category names separated by blanks in a single "
-                "or double quoted string.\n");
+        printf("The third is the name of the category input file\n");
         return 0;
     }
 
@@ -65,10 +68,11 @@ int main(int argc, char * argv[])
     }
 
     /* Process Categories */
+    UT_hash_handle hh;
     while(fgets(line, sizeof(line), categoriesFile)) {
         struct Queue *queue = makeQueue();
         queue->category = line;
-        HASH_ADD_INT(queueHashTable, category, queue);  /* Arguments: Hash Table, key, value*/
+        HASH_ADD_KEYPTR(hh, queueHashTable, line, strlen(line), queue);  /* Arguments: Hash Table, key, value*/
     }
     struct filePointer *fp = malloc(sizeof(struct filePointer));
     fp->fp = bookFile;
@@ -76,7 +80,13 @@ int main(int argc, char * argv[])
 
     fprintf(stderr, "about to go into the thread\n");
 
+<<<<<<< HEAD
     pthread_create(&ignore, 0, producer, fp);
+=======
+    struct Queue *queue = lookupQueue("SPORTS01\n");
+    printf("queue test: %s\n", queue->category);
+
+>>>>>>> 54590a3c9c7c7250ad843d7669e83a1fbf1ba1eb
     pthread_exit(0);
 }
 
@@ -105,14 +115,14 @@ void addCustomer(struct customer *cInfo)
 struct customer * lookupCustomer(char * customerID)
 {
     struct customer *c;
-    HASH_FIND_INT(customersHashTable, &customerID, c);
+    HASH_FIND_STR(customersHashTable, customerID, c);
     return c;
 }
 
 struct Queue * lookupQueue(char * category)
 {
     struct Queue *q;
-    HASH_FIND_INT(queueHashTable, &category, q);
+    HASH_FIND_STR(queueHashTable, category, q);
     return q;
 }
 
@@ -139,7 +149,6 @@ void * producer(void * arg)
         enqueue(queue,order);
         fprintf(stderr, "here\n");
         printf("----%s-----\n", queue->category);
-
     }
     return 0;
 }
