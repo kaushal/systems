@@ -16,6 +16,7 @@ struct Queue {
     struct QueueNode *head;
     struct QueueNode *tail;
     pthread_mutex_t lock;
+    pthread_cond_t dataAvailable;
     UT_hash_handle hh;
 };
 

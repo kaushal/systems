@@ -16,16 +16,6 @@ struct customer {
     UT_hash_handle hh;
 };
 
-struct sharedData {
-    int         isopen;
-    unsigned int    front;
-    unsigned int    count;
-    unsigned int    bufsize;
-    pthread_mutex_t mutex;
-    pthread_cond_t  dataAvailable;
-    pthread_cond_t  spaceAvailable;
-};
-
 struct bookOrder {
     char * title;
     double price;
@@ -115,3 +105,24 @@ struct Queue * lookupQueue(char * category)
     HASH_FIND_INT(queueHashTable, &category, q);
     return q;
 }
+
+void * producer(FILE *bookFile)
+{
+    char line[256];
+    while(fgets(line, sizeof(line), bookFile)) {
+        struct bookOrder *order = malloc(sizeof(struct bookOrder));
+        char * token = strtok(line, "|");
+        order->title = token;
+        token = strtok(NULL, "|");
+        order->price = atof(token);
+        token = strtok(NULL, "|");
+        order->customerID = atoi(token);
+        token = strtok(NULL, "|");
+        order->category= token;
+
+        struct Queue *queue = lookupQueue(order->category);
+        enqueue(queue,order);
+
+    }
+}
+
