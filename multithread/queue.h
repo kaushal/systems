@@ -2,6 +2,7 @@
 #define QUEUE_H
 
 #include <pthread.h>
+#include "uthash.h"
 
 struct QueueNode {
     void * data;
