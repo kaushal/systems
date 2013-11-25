@@ -8,6 +8,7 @@
 
 struct filePointer {
     FILE *fp;
+    struct Queue *table;
 };
 
 struct customer {
@@ -35,11 +36,8 @@ struct Queue *queueHashTable = NULL;
 struct customer * makeCustomer(char *line);
 void addCustomer(struct customer *cInfo);
 char ** processCategories(char * categories);
-<<<<<<< HEAD
 void * producer(void *arg);
-=======
 struct Queue * lookupQueue(char * category);
->>>>>>> 54590a3c9c7c7250ad843d7669e83a1fbf1ba1eb
 
 int main(int argc, char * argv[])
 {
@@ -66,27 +64,32 @@ int main(int argc, char * argv[])
        struct customer *newCustomer =  makeCustomer(line);
        addCustomer(newCustomer);
     }
-
+    char *randomLine;
     /* Process Categories */
-    UT_hash_handle hh;
     while(fgets(line, sizeof(line), categoriesFile)) {
         struct Queue *queue = makeQueue();
-        queue->category = line;
-        HASH_ADD_KEYPTR(hh, queueHashTable, line, strlen(line), queue);  /* Arguments: Hash Table, key, value*/
+        line[strlen(line) - 1] = '\0';
+        char *newString = strdup(line);
+        fprintf(stderr, "%d\n", strlen(newString));
+        fprintf(stderr, "------%s-------\n", newString);
+        queue->category = newString;
+        
+        HASH_ADD_KEYPTR(hh, queueHashTable, queue->category, strlen(queue->category), queue);  /* Arguments: Hash Table, key, value*/
     }
     struct filePointer *fp = malloc(sizeof(struct filePointer));
     fp->fp = bookFile;
+    fp->table = queueHashTable;
     pthread_t ignore;
 
-    fprintf(stderr, "about to go into the thread\n");
+    //fprintf(stderr, "about to go into the thread\n");
 
-<<<<<<< HEAD
     pthread_create(&ignore, 0, producer, fp);
-=======
-    struct Queue *queue = lookupQueue("SPORTS01\n");
-    printf("queue test: %s\n", queue->category);
+    
+    //struct Queue *queue = lookupQueue("HOUSING01"); 
+    //HASH_FIND(hh, queueHashTable, "HOUSING01", strlen("HOUSING01"), queue);
+    //fprintf(stderr,"you about to fail");
+    //printf("queue test: %s\n", queue->category);
 
->>>>>>> 54590a3c9c7c7250ad843d7669e83a1fbf1ba1eb
     pthread_exit(0);
 }
 
@@ -122,7 +125,7 @@ struct customer * lookupCustomer(char * customerID)
 struct Queue * lookupQueue(char * category)
 {
     struct Queue *q;
-    HASH_FIND_STR(queueHashTable, category, q);
+    HASH_FIND(hh, queueHashTable, category, strlen(category), q);
     return q;
 }
 
@@ -141,14 +144,19 @@ void * producer(void * arg)
         token = strtok(NULL, "|");
         order->customerID = atoi(token);
         token = strtok(NULL, "|");
+        token[strlen(token) - 1] = '\0';
+
         order->category= token;
         
         fprintf(stderr, "%s\n", order->category);
         struct Queue *queue = lookupQueue(order->category);
-        fprintf(stderr, "----%s-----\n", queue->category);
+        pthread_mutex_lock(&queue->lock);
         enqueue(queue,order);
-        fprintf(stderr, "here\n");
-        printf("----%s-----\n", queue->category);
+        pthread_mutex_unlock(&queue->lock);
+        printf("----%s----\n", queue->category);
+        if(queue->length == 1){
+            pthread_cond_signal(&queue->dataAvailable);
+        }
     }
     return 0;
 }
