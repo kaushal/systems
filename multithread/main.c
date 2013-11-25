@@ -112,7 +112,7 @@ struct customer * makeCustomer(char *line)
 
 void addCustomer(struct customer *cInfo)
 {
-    HASH_ADD_INT(customersHashTable, customerID, cInfo );  /* Arguments: Hash Table, key, value*/
+    HASH_ADD_INT(custmersHashTable, customerID, cInfo );  /* Arguments: Hash Table, key, value*/
 }
 
 struct customer * lookupCustomer(char * customerID)
@@ -127,6 +127,11 @@ struct Queue * lookupQueue(char * category)
     struct Queue *q;
     HASH_FIND(hh, queueHashTable, category, strlen(category), q);
     return q;
+}
+
+void * consumer(void * arg){
+    //read form the queue that you are assigned, and do the opperation on the database
+    return 1;
 }
 
 void * producer(void * arg)
