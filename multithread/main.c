@@ -6,6 +6,10 @@
 #include "uthash.h"
 #include "queue.h"
 
+struct filePointer {
+    FILE *fp;
+};
+
 struct customer {
     char * name;
     int customerID;         /* key */
@@ -31,6 +35,7 @@ struct Queue *queueHashTable = NULL;
 struct customer * makeCustomer(char *line);
 void addCustomer(struct customer *cInfo);
 char ** processCategories(char * categories);
+void * producer(void *arg);
 
 int main(int argc, char * argv[])
 {
@@ -56,7 +61,6 @@ int main(int argc, char * argv[])
     /*Create customers hash table*/
     while(fgets(line, sizeof(line), dbFile)) {
        struct customer *newCustomer =  makeCustomer(line);
-       printf("newCustomer: %s\n", newCustomer->name);
        addCustomer(newCustomer);
     }
 
@@ -66,7 +70,13 @@ int main(int argc, char * argv[])
         queue->category = line;
         HASH_ADD_INT(queueHashTable, category, queue);  /* Arguments: Hash Table, key, value*/
     }
+    struct filePointer *fp = malloc(sizeof(struct filePointer));
+    fp->fp = bookFile;
+    pthread_t ignore;
 
+    fprintf(stderr, "about to go into the thread\n");
+
+    pthread_create(&ignore, 0, producer, fp);
     pthread_exit(0);
 }
 
@@ -106,8 +116,11 @@ struct Queue * lookupQueue(char * category)
     return q;
 }
 
-void * producer(FILE *bookFile)
+void * producer(void * arg)
 {
+    fprintf(stderr, "in thread\n");
+    struct filePointer *fp = (struct filePointer *)arg;
+    FILE *bookFile = fp->fp; 
     char line[256];
     while(fgets(line, sizeof(line), bookFile)) {
         struct bookOrder *order = malloc(sizeof(struct bookOrder));
@@ -119,10 +132,16 @@ void * producer(FILE *bookFile)
         order->customerID = atoi(token);
         token = strtok(NULL, "|");
         order->category= token;
-
+        
+        fprintf(stderr, "%s\n", order->category);
         struct Queue *queue = lookupQueue(order->category);
+        fprintf(stderr, "----%s-----\n", queue->category);
         enqueue(queue,order);
+        fprintf(stderr, "here\n");
+        printf("----%s-----\n", queue->category);
 
     }
+    return 0;
 }
+
 
