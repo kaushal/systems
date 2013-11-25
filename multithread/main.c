@@ -2,7 +2,9 @@
 #include <string.h>
 #include <pthread.h>
 #include <stdlib.h>
+
 #include "uthash.h"
+#include "queue.h"
 
 struct customer {
     char * name;
@@ -31,8 +33,9 @@ struct bookOrder {
     char * category;
 };
 
-/*Global Hash Table*/
+/*Global Hash Tables*/
 struct customer *customersHashTable = NULL;
+struct Queue *queueHashTable = NULL;
 
 /*Method Declarations*/
 struct customer * makeCustomer(char *line);
@@ -53,7 +56,8 @@ int main(int argc, char * argv[])
     /*Read and check files*/
     FILE *dbFile = fopen(argv[1], "r");
     FILE *bookFile = fopen(argv[2], "r");
-    if( dbFile == NULL || bookFile == NULL) {
+    FILE *categoriesFile = fopen(argv[3], "r");
+    if( dbFile == NULL || bookFile == NULL || categoriesFile == NULL) {
         printf("Error reading file\n");
         return 1;
     }
@@ -67,8 +71,11 @@ int main(int argc, char * argv[])
     }
 
     /* Process Categories */
-    char * allCategories = argv[3];
-    char ** categoriesArray = processCategories(allCategories);
+    while(fgets(line, sizeof(line), categoriesFile)) {
+        struct Queue *queue = makeQueue();
+        queue->category = line;
+        HASH_ADD_INT(queueHashTable, category, queue);  /* Arguments: Hash Table, key, value*/
+    }
 
     pthread_exit(0);
 }
@@ -92,26 +99,19 @@ struct customer * makeCustomer(char *line)
 
 void addCustomer(struct customer *cInfo)
 {
-    struct customer *c;
-    c = malloc(sizeof(struct customer));
-    c->customerID = cInfo->customerID;
-    HASH_ADD_INT(customersHashTable, customerID, c );  /* Arguments: Hash Table, key, value*/
+    HASH_ADD_INT(customersHashTable, customerID, cInfo );  /* Arguments: Hash Table, key, value*/
 }
 
-char ** processCategories(char * categories)
+struct customer * lookupCustomer(char * customerID)
 {
-    int categoryCount = 0;
+    struct customer *c;
+    HASH_FIND_INT(customersHashTable, &customerID, c);
+    return c;
+}
 
-    char * token = strtok(categories, " ");
-    if(token) categoryCount++;
-    while((token = strtok(NULL, " ")) != NULL) {
-        categoryCount++;
-    }
-    char **categoriesArray[categoryCount];
-    token = strtok(categories, " ");
-    if(token) categoryCount++;
-    while((token = strtok(NULL, " ")) != NULL) {
-        printf("working\n");
-    }
-    return categoriesArray;
+struct Queue * lookupQueue(char * category)
+{
+    struct Queue *q;
+    HASH_FIND_INT(queueHashTable, &category, q);
+    return q;
 }
