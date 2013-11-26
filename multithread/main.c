@@ -35,9 +35,11 @@ struct bookOrder {
     double price;
     char * customerID;
     char * category;
+    int currBal;
 };
 
 /*Global Hash Tables*/
+int consumerThreadCount = 0;
 struct customer *customersHashTable = NULL;
 struct Queue *queueHashTable = NULL;
 
@@ -96,7 +98,7 @@ int main(int argc, char * argv[])
     struct Queue *s;
 
     pthread_create(&ignore, 0, producer, fp);
-
+    int threadCount = 0;
     for(s=queueHashTable; s != NULL; s=s->hh.next) {
         while(producerEmpty == 0){;}
         struct filePointer *data = malloc(sizeof(struct filePointer));
@@ -105,9 +107,25 @@ int main(int argc, char * argv[])
             continue;
         fprintf(stderr, "thread name: %s\n", data->table->category);
         pthread_create(&ignore, 0, consumer, data);
+        threadCount++;
+    }
+    struct customer *c;
+    while(consumerThreadCount != threadCount){;}
+    for(c=customersHashTable; c != NULL; c=c->hh.next) {
+        printf("=== BEGIN CUSTOMER INFO ===\n");
+        printf("### BALANCE ###\n");
+        printf("Customer Name: %s\n", c->name);
+        printf("Customer ID: %s\n", c->customerID);
+        printf("Remaining credit balance after all purchases (a dollar amount): $%f\n", c->balance);
+        printf("### SUCCESSFUL ORDERS ###\n");
+        struct llNode *tempHead = c->successHead;
+        while(tempHead != NULL){
+            printf(" %s | %f | %f\n", tempHead->order->title, tempHead->order->price, tempHead->order->currBal);
+            tempHead = tempHead->next;
+        }
+        
     }
     pthread_exit(0);
-
 }
 
 void * consumer(void * arg)
@@ -123,6 +141,7 @@ void * consumer(void * arg)
         bo = (struct bookOrder *)temp->data;
 
         struct customer *c = lookupCustomer(bo->customerID); 
+        pthread_mutex_lock(&c->mutex);
         fprintf(stderr, "cat: %s, title: %s, price: %f \n", bo->category, bo->title, bo->price);
         if(c == NULL)
             fprintf(stderr, "------------------null\n");
@@ -136,17 +155,17 @@ void * consumer(void * arg)
             }
             struct llNode *listHead;
             if(success){
-                printf("success\n");
                 listHead = c->successHead;
             }
             else {
-                printf("failure\n");
                 listHead = c->failedHead;
             }
             if(listHead == NULL){
                 struct llNode *tempNode = malloc(sizeof(struct llNode));
                 tempNode->order = bo;
-                listHead = tempNode; 
+                tempNode->order->currBal = c->balance;
+                listHead = tempNode;
+                listHead->next = NULL;
             }
             else { 
                 while(listHead->next != NULL){
@@ -155,11 +174,14 @@ void * consumer(void * arg)
                 } 
                 struct llNode *tempNode = malloc(sizeof(struct llNode));
                 tempNode->order = bo;
+                tempNode->order->currBal = c->balance;
                 listHead->next = tempNode; 
+                listHead->next = NULL;
             }
         }        
+        pthread_mutex_unlock(&c->mutex);
     }
-
+    consumerThreadCount++;
     return 0;
 }
 
