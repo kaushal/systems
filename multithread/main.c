@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "uthash.h"
+#include "tokenizer.h"
 #include "queue.h"
 
 struct filePointer {
@@ -13,7 +14,7 @@ struct filePointer {
 
 struct customer {
     char * name;
-    int customerID;         /* key */
+    char * customerID;         /* key */
     double balance;
     char * address;
     char * state;
@@ -67,6 +68,8 @@ int main(int argc, char * argv[])
     while(fgets(line, sizeof(line), dbFile)) {
         struct customer *newCustomer =  makeCustomer(line);
         addCustomer(newCustomer);
+        struct customer *tempCustomer;
+        HASH_FIND_STR(customersHashTable, newCustomer->customerID, tempCustomer);
     }
     /* Process Categories */
     while(fgets(line, sizeof(line), categoriesFile)) {
@@ -182,28 +185,35 @@ void * producer(void * arg)
 }
 
 
-
-
 struct customer * makeCustomer(char *line)
 {
+    printf("MAKING THE FUCKING CUSTOMER");
     struct customer *c = malloc(sizeof(struct customer));
-
-    char * token = strtok(line, "|");
+    TokenizerT *tokenizer = TKCreate("|", line);
+    
+    /*name*/
+    char * token = TKGetNextToken(tokenizer);
     c->name = token;
-    token = strtok(NULL, "|");
-    c->customerID = atoi(token);
-    token = strtok(NULL, "|");
+    /*customerID*/
+    token = TKGetNextToken(tokenizer);
+    c->customerID = token;
+    /*address*/
+    token = TKGetNextToken(tokenizer);
     c->address = token;
-    token = strtok(NULL, "|");
+    /*state*/
+    token = TKGetNextToken(tokenizer);
     c->state = token;
-    token = strtok(NULL, "|");
+    /*areaCode*/
+    token = TKGetNextToken(tokenizer);
     c->areaCode = token;
+
+    printf("customer test: %s\n", c->name);
     return c;
 }
 
 void addCustomer(struct customer *cInfo)
 {
-    HASH_ADD_INT(customersHashTable, customerID, cInfo );  /* Arguments: Hash Table, key, value*/
+        HASH_ADD_KEYPTR(hh, customersHashTable, cInfo->customerID, strlen(cInfo->customerID), cInfo);  /* Arguments: Hash Table, key, value*/
 }
 
 struct customer * lookupCustomer(char * customerID)
