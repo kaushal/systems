@@ -85,6 +85,11 @@ int main(int argc, char * argv[])
 
     pthread_create(&ignore, 0, producer, fp);
 
+    while(producerEmpty == 0){
+        fprintf(stderr, "");
+    }
+
+    return 0;
     for(s=queueHashTable; s != NULL; s=s->hh.next) {
         struct filePointer *data = malloc(sizeof(struct filePointer));
         data->table = s;
@@ -103,26 +108,32 @@ void * consumer(void * arg)
     struct filePointer *data = (struct filePointer *)arg;
     struct Queue *queue = data->table;
     fprintf(stderr, "about to go into the consumer in the thread %s\n", data->table->category);
-    while(1){
-        fprintf(stderr, "%s: looping\n", data->table->category);
-
-        pthread_mutex_lock(&queue->mutex);
-        if(queue->length == 0 && producerEmpty == 0){
-            fprintf(stderr, "%s: waiting\n", data->table->category);
-            pthread_cond_wait(&queue->dataAvailable, &queue->mutex);
-            fprintf(stderr, "%s: stopped waiting\n", data->table->category);
-        }
-        else if(queue->length >= 1 && producerEmpty == 1 ){
-            struct QueueNode *head = dequeue(queue);
-            struct bookOrder *order = head->data;
-            fprintf(stderr, "----bullshit------");
-            printf("GAHHHHHH: %s\n", order->title);
-        }
-        else{
-            return 0;
-        }/*printf("%s\n",head->);*/
-        pthread_mutex_unlock(&queue->mutex);
+    struct bookOrder *temp;
+    while(queue->length > 0){
+        temp = (struct bookOrder *)dequeue(queue);
+        fprintf(stderr, "queue: %s ,title: %s\n", data->table->category, temp->title);
+        fprintf(stderr, "queue: %s ,length: %d\n", data->table->category, queue->length);
     }
+    /*while(1){
+      fprintf(stderr, "%s: looping\n", data->table->category);
+
+      pthread_mutex_lock(&queue->mutex);
+      if(queue->length == 0 && producerEmpty == 0){
+      fprintf(stderr, "%s: waiting\n", data->table->category);
+      pthread_cond_wait(&queue->dataAvailable, &queue->mutex);
+      fprintf(stderr, "%s: stopped waiting\n", data->table->category);
+      }
+      else if(queue->length >= 1 && producerEmpty == 1 ){
+      struct QueueNode *head = dequeue(queue);
+      struct bookOrder *order = head->data;
+      fprintf(stderr, "----bullshit------");
+      printf("GAHHHHHH: %s\n", order->title);
+      }
+      else{
+      return 0;
+      }
+      pthread_mutex_unlock(&queue->mutex);
+      }*/
     return 0;
 }
 
@@ -136,27 +147,44 @@ void * producer(void * arg)
     while(fgets(line, sizeof(line), bookFile)) {
         struct bookOrder *order = malloc(sizeof(struct bookOrder));
         struct QueueNode *node = malloc(sizeof(struct QueueNode));
+
+        //title
         char * token = strtok(line, "|");
-        order->title = token;
+        fprintf(stderr, "%p\n", &token);
+        char *tempTitle = malloc(sizeof(1 + strlen(token)));
+        strncpy(tempTitle, token, 100000);
+        order->title = tempTitle;
+
+        //price
         token = strtok(NULL, "|");
-        order->price = atof(token);
+        fprintf(stderr, "%s\n", token);
+        char *tempPrice= malloc(sizeof(1 + strlen(token)));
+        strcpy(tempPrice, token);
+        order->price = atof(tempPrice);
+
+        //customerID
         token = strtok(NULL, "|");
-        order->customerID = atoi(token);
+        fprintf(stderr, "%s\n", token);
+        char *tempCID= malloc(sizeof(1 + strlen(token)));
+        strcpy(tempCID, token);
+        order->customerID = atoi(tempCID);
+
+        //category
         token = strtok(NULL, "|");
         token[strlen(token) - 1] = '\0';
-        order->category= token;
+        char *tempCat= malloc(sizeof(1 + strlen(token)));
+        strcpy(tempCat, token);
+        order->category = tempCat;
 
         node->data = order;
 
+        fprintf(stderr, "%s\n", order->title);
+        fprintf(stderr, "%f\n", order->price);
+        fprintf(stderr, "%d\n", order->customerID);
         fprintf(stderr, "%s\n", order->category);
         struct Queue *queue = lookupQueue(order->category);
-        pthread_mutex_lock(&queue->mutex);
         enqueue(queue, node);
-        pthread_mutex_unlock(&queue->mutex);
         printf("%s enqueued\n", queue->category);
-        if(queue->length == 1){
-            pthread_cond_signal(&queue->dataAvailable);
-        }
     }
     producerEmpty = 1;
     return 0;
