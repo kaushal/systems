@@ -6,7 +6,6 @@
 struct Queue *makeQueue()
 {
     struct Queue *queue = malloc(sizeof(struct Queue));
-    queue->isOpen = 1;
     queue->category = NULL;
     queue->length = 0;
     queue->head = NULL;
