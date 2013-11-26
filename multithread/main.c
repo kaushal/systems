@@ -89,7 +89,6 @@ int main(int argc, char * argv[])
         fprintf(stderr, "");
     }
 
-    return 0;
     for(s=queueHashTable; s != NULL; s=s->hh.next) {
         struct filePointer *data = malloc(sizeof(struct filePointer));
         data->table = s;
