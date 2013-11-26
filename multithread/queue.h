@@ -11,17 +11,16 @@ struct QueueNode {
 
 struct Queue {
     char * category; /* key */
-    int isOpen;
     int length;
     struct QueueNode *head;
     struct QueueNode *tail;
-    pthread_mutex_t lock;
+    pthread_mutex_t mutex;
     pthread_cond_t dataAvailable;
     UT_hash_handle hh;
 };
 
 struct Queue *makeQueue();
-void enqueue(struct Queue *queue, void *category);
+void enqueue(struct Queue *queue, struct QueueNode *node);
 void *dequeue(struct Queue *queue);
 void destroyQueue(struct Queue *queue);
 

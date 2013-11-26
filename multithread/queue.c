@@ -11,11 +11,11 @@ struct Queue *makeQueue()
     queue->length = 0;
     queue->head = NULL;
     queue->tail = NULL;
-    pthread_mutex_init(&queue->lock, 0);
+    pthread_mutex_init(&queue->mutex, 0);
     return queue;
 }
 
-void enqueue(struct Queue *queue, void *data)
+void enqueue(struct Queue *queue, struct QueueNode *data)
 {
     struct QueueNode *node = malloc(sizeof(struct QueueNode));
     node->data = data;
