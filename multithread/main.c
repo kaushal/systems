@@ -118,8 +118,8 @@ void * consumer(void * arg)
         struct QueueNode *head = dequeue(queue);
         struct bookOrder *order = head->data;
         fprintf(stderr, "----bullshit------");
-        printf("GAHHHHHH: %s\n", order->title);
-        /*printf("%s\n",head->);*/
+        printf("title: %s\n", order->title);
+        printf("price: %f\n", order->price);
         pthread_mutex_unlock(&queue->mutex);
     }
     return 0;
