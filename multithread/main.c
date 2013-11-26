@@ -97,11 +97,8 @@ int main(int argc, char * argv[])
 
     pthread_create(&ignore, 0, producer, fp);
 
-    while(producerEmpty == 0){
-        fprintf(stderr, "");
-    }
-
     for(s=queueHashTable; s != NULL; s=s->hh.next) {
+        while(producerEmpty == 0){;}
         struct filePointer *data = malloc(sizeof(struct filePointer));
         data->table = s;
         if(s->category == NULL)
