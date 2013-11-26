@@ -116,6 +116,7 @@ void * consumer(void * arg)
         bo = (struct bookOrder *)temp->data;
         
        struct customer *c = lookupCustomer(bo->customerID); 
+       fprintf(stderr, "cat: %s, title: %s \n", bo->category, bo->title);
        if(c == NULL)
            fprintf(stderr, "------------------null\n");
        else    
