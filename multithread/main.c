@@ -176,41 +176,27 @@ void * producer(void * arg)
     while(fgets(line, sizeof(line), bookFile)) {
         struct bookOrder *order = malloc(sizeof(struct bookOrder));
         struct QueueNode *node = malloc(sizeof(struct QueueNode));
+        TokenizerT *tokenizer = TKCreate("|", line);
 
         //title
-        char * token = strtok(line, "|");
-        fprintf(stderr, "%p\n", &token);
-        char *tempTitle = malloc(sizeof(1 + strlen(token)));
-        strncpy(tempTitle, token, 100000);
-        order->title = tempTitle;
+        char * tok = TKGetNextToken(tokenizer);
+        order->title = tok;
 
         //price
-        token = strtok(NULL, "|");
-        fprintf(stderr, "%s\n", token);
-        char *tempPrice= malloc(sizeof(1 + strlen(token)));
-        strcpy(tempPrice, token);
-        order->price = atof(tempPrice);
+        tok = TKGetNextToken(tokenizer);
+        order->price = atof(tok);
 
         //customerID
-        token = strtok(NULL, "|");
-        fprintf(stderr, "%s\n", token);
-        char *tempCID= malloc(sizeof(1 + strlen(token)));
-        strcpy(tempCID, token);
-        order->customerID = tempCID;
+        tok = TKGetNextToken(tokenizer);
+        order->customerID = tok;
 
         //category
-        token = strtok(NULL, "|");
-        token[strlen(token) - 1] = '\0';
-        char *tempCat= malloc(sizeof(1 + strlen(token)));
-        strcpy(tempCat, token);
-        order->category = tempCat;
+        tok = TKGetNextToken(tokenizer);
+        order->category = tok;
+        tok[strlen(tok)-1] = '\0';
 
         node->data = order;
 
-        fprintf(stderr, "%s\n", order->title);
-        fprintf(stderr, "%f\n", order->price);
-        fprintf(stderr, "%d\n", order->customerID);
-        fprintf(stderr, "%s\n", order->category);
         struct Queue *queue = lookupQueue(order->category);
         enqueue(queue, node);
         printf("%s enqueued\n", queue->category);
@@ -222,7 +208,6 @@ void * producer(void * arg)
 
 struct customer * makeCustomer(char *line)
 {
-    printf("MAKING THE FUCKING CUSTOMER");
     struct customer *c = malloc(sizeof(struct customer));
     TokenizerT *tokenizer = TKCreate("|", line);
 
@@ -232,6 +217,9 @@ struct customer * makeCustomer(char *line)
     /*customerID*/
     token = TKGetNextToken(tokenizer);
     c->customerID = token;
+    /*balance*/
+    token = TKGetNextToken(tokenizer);
+    c->balance= atof(token);
     /*address*/
     token = TKGetNextToken(tokenizer);
     c->address = token;
