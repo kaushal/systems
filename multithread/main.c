@@ -12,6 +12,11 @@ struct filePointer {
     struct Queue *table;
 };
 
+struct llNode {
+    struct llNode *next;
+    struct bookOrder *order;
+};
+
 struct customer {
     char * name;
     char * customerID;         /* key */
@@ -19,6 +24,8 @@ struct customer {
     char * address;
     char * state;
     char * areaCode;
+    struct llNode *successHead;
+    struct llNode *failedHead;
     pthread_mutex_t mutex;
     UT_hash_handle hh;
 };
@@ -111,23 +118,51 @@ void * consumer(void * arg)
     pthread_detach( pthread_self() );
     struct filePointer *data = (struct filePointer *)arg;
     struct Queue *queue = data->table;
-    fprintf(stderr, "about to go into the consumer in the thread %s\n", data->table->category);
+    fprintf(stderr, "-------------------------------about to go into the consumer in the thread %s\n", data->table->category);
     struct QueueNode *temp;
     struct bookOrder *bo;
     while(queue->length > 0){
         temp = (struct QueueNode*)dequeue(queue);
         bo = (struct bookOrder *)temp->data;
-        
-       struct customer *c = lookupCustomer(bo->customerID); 
-       fprintf(stderr, "cat: %s, title: %s \n", bo->category, bo->title);
-       if(c == NULL)
-           fprintf(stderr, "------------------null\n");
-       else    
-           fprintf(stderr, "------------------not\n");
-        //fprintf(stderr, "queue: %s ,title: %s\n", data->table->category, temp->title);
-       // fprintf(stderr, "queue: %s ,length: %d\n", data->table->category, queue->length);
+
+        struct customer *c = lookupCustomer(bo->customerID); 
+        fprintf(stderr, "cat: %s, title: %s, price: %f \n", bo->category, bo->title, bo->price);
+        if(c == NULL)
+            fprintf(stderr, "------------------null\n");
+        else {    
+            fprintf(stderr, "------------------not\n");
+            fprintf(stderr, "name: %s, balance: %f, cid: %s \n", c->name, c->balance, c->customerID);
+            int success = 0;
+            if(c->balance >= bo->price){
+                c->balance -= bo->price;
+                success = 1;
+            }
+            struct llNode *listHead;
+            if(success){
+                printf("success\n");
+                listHead = c->successHead;
+            }
+            else {
+                printf("failure\n");
+                listHead = c->failedHead;
+            }
+            if(listHead == NULL){
+                struct llNode *tempNode = malloc(sizeof(struct llNode));
+                tempNode->order = bo;
+                listHead = tempNode; 
+            }
+            else { 
+                while(listHead->next != NULL){
+                    printf("iterating\n");
+                    listHead = listHead->next;
+                } 
+                struct llNode *tempNode = malloc(sizeof(struct llNode));
+                tempNode->order = bo;
+                listHead->next = tempNode; 
+            }
+        }        
     }
-    
+
     return 0;
 }
 
@@ -190,7 +225,7 @@ struct customer * makeCustomer(char *line)
     printf("MAKING THE FUCKING CUSTOMER");
     struct customer *c = malloc(sizeof(struct customer));
     TokenizerT *tokenizer = TKCreate("|", line);
-    
+
     /*name*/
     char * token = TKGetNextToken(tokenizer);
     c->name = token;
@@ -207,13 +242,15 @@ struct customer * makeCustomer(char *line)
     token = TKGetNextToken(tokenizer);
     c->areaCode = token;
 
-    printf("customer test: %s\n", c->name);
+    c->successHead = NULL;
+    c->failedHead = NULL;
+
     return c;
 }
 
 void addCustomer(struct customer *cInfo)
 {
-        HASH_ADD_KEYPTR(hh, customersHashTable, cInfo->customerID, strlen(cInfo->customerID), cInfo);  /* Arguments: Hash Table, key, value*/
+    HASH_ADD_KEYPTR(hh, customersHashTable, cInfo->customerID, strlen(cInfo->customerID), cInfo);  /* Arguments: Hash Table, key, value*/
 }
 
 struct customer * lookupCustomer(char * customerID)
