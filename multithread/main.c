@@ -99,11 +99,11 @@ int main(int argc, char * argv[])
 
 void * consumer(void * arg)
 {
+    pthread_detach( pthread_self() );
     struct filePointer *data = (struct filePointer *)arg;
     struct Queue *queue = data->table;
     fprintf(stderr, "about to go into the consumer in the thread %s\n", data->table->category);
     while(1){
-        pthread_detach( pthread_self() );
         fprintf(stderr, "%s: looping\n", data->table->category);
 
         pthread_mutex_lock(&queue->mutex);
@@ -112,14 +112,15 @@ void * consumer(void * arg)
             pthread_cond_wait(&queue->dataAvailable, &queue->mutex);
             fprintf(stderr, "%s: stopped waiting\n", data->table->category);
         }
-        else if(producerEmpty != 0){
-            return 0;
+        else if(queue->length >= 1 && producerEmpty == 1 ){
+            struct QueueNode *head = dequeue(queue);
+            struct bookOrder *order = head->data;
+            fprintf(stderr, "----bullshit------");
+            printf("GAHHHHHH: %s\n", order->title);
         }
-        struct QueueNode *head = dequeue(queue);
-        struct bookOrder *order = head->data;
-        fprintf(stderr, "----bullshit------");
-        printf("GAHHHHHH: %s\n", order->title);
-        /*printf("%s\n",head->);*/
+        else{
+            return 0;
+        }/*printf("%s\n",head->);*/
         pthread_mutex_unlock(&queue->mutex);
     }
     return 0;
