@@ -18,13 +18,14 @@ struct customer {
     char * address;
     char * state;
     char * areaCode;
+    pthread_mutex_t mutex;
     UT_hash_handle hh;
 };
 
 struct bookOrder {
     char * title;
     double price;
-    int customerID;
+    char * customerID;
     char * category;
 };
 
@@ -34,6 +35,7 @@ struct Queue *queueHashTable = NULL;
 
 /*Method Declarations*/
 void * consumer(void * arg);
+struct customer * lookupCustomer(char * customerID);
 struct customer * makeCustomer(char *line);
 void addCustomer(struct customer *cInfo);
 char ** processCategories(char * categories);
@@ -107,32 +109,21 @@ void * consumer(void * arg)
     struct filePointer *data = (struct filePointer *)arg;
     struct Queue *queue = data->table;
     fprintf(stderr, "about to go into the consumer in the thread %s\n", data->table->category);
-    struct bookOrder *temp;
+    struct QueueNode *temp;
+    struct bookOrder *bo;
     while(queue->length > 0){
-        temp = (struct bookOrder *)dequeue(queue);
-        fprintf(stderr, "queue: %s ,title: %s\n", data->table->category, temp->title);
-        fprintf(stderr, "queue: %s ,length: %d\n", data->table->category, queue->length);
+        temp = (struct QueueNode*)dequeue(queue);
+        bo = (struct bookOrder *)temp->data;
+        
+       struct customer *c = lookupCustomer(bo->customerID); 
+       if(c == NULL)
+           fprintf(stderr, "------------------null\n");
+       else    
+           fprintf(stderr, "------------------not\n");
+        //fprintf(stderr, "queue: %s ,title: %s\n", data->table->category, temp->title);
+       // fprintf(stderr, "queue: %s ,length: %d\n", data->table->category, queue->length);
     }
-    /*while(1){
-      fprintf(stderr, "%s: looping\n", data->table->category);
-
-      pthread_mutex_lock(&queue->mutex);
-      if(queue->length == 0 && producerEmpty == 0){
-      fprintf(stderr, "%s: waiting\n", data->table->category);
-      pthread_cond_wait(&queue->dataAvailable, &queue->mutex);
-      fprintf(stderr, "%s: stopped waiting\n", data->table->category);
-      }
-      else if(queue->length >= 1 && producerEmpty == 1 ){
-      struct QueueNode *head = dequeue(queue);
-      struct bookOrder *order = head->data;
-      fprintf(stderr, "----bullshit------");
-      printf("GAHHHHHH: %s\n", order->title);
-      }
-      else{
-      return 0;
-      }
-      pthread_mutex_unlock(&queue->mutex);
-      }*/
+    
     return 0;
 }
 
@@ -166,7 +157,7 @@ void * producer(void * arg)
         fprintf(stderr, "%s\n", token);
         char *tempCID= malloc(sizeof(1 + strlen(token)));
         strcpy(tempCID, token);
-        order->customerID = atoi(tempCID);
+        order->customerID = tempCID;
 
         //category
         token = strtok(NULL, "|");
