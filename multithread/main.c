@@ -24,6 +24,7 @@ struct customer {
     char * address;
     char * state;
     char * areaCode;
+    struct llNode *head;
     struct llNode *successHead;
     struct llNode *failedHead;
     pthread_mutex_t mutex;
@@ -35,9 +36,11 @@ struct bookOrder {
     double price;
     char * customerID;
     char * category;
-    int currBal;
+    double currBal;
+    int success;
 };
 
+struct llNode *globalLL = NULL;
 /*Global Hash Tables*/
 int consumerThreadCount = 0;
 struct customer *customersHashTable = NULL;
@@ -85,8 +88,6 @@ int main(int argc, char * argv[])
         struct Queue *queue = makeQueue();
         line[strlen(line) - 1] = '\0';
         char *newString = strdup(line);
-        fprintf(stderr, "%d\n", strlen(newString));
-        fprintf(stderr, "------%s-------\n", newString);
         queue->category = newString;
 
         HASH_ADD_KEYPTR(hh, queueHashTable, queue->category, strlen(queue->category), queue);  /* Arguments: Hash Table, key, value*/
@@ -105,25 +106,33 @@ int main(int argc, char * argv[])
         data->table = s;
         if(s->category == NULL)
             continue;
-        fprintf(stderr, "thread name: %s\n", data->table->category);
         pthread_create(&ignore, 0, consumer, data);
         threadCount++;
     }
     struct customer *c;
     while(consumerThreadCount != threadCount){;}
     for(c=customersHashTable; c != NULL; c=c->hh.next) {
-        printf("=== BEGIN CUSTOMER INFO ===\n");
+        printf("\n=== BEGIN CUSTOMER INFO ===\n");
         printf("### BALANCE ###\n");
         printf("Customer Name: %s\n", c->name);
         printf("Customer ID: %s\n", c->customerID);
         printf("Remaining credit balance after all purchases (a dollar amount): $%f\n", c->balance);
         printf("### SUCCESSFUL ORDERS ###\n");
-        struct llNode *tempHead = c->successHead;
+        struct llNode *tempHead = globalLL;
         while(tempHead != NULL){
-            printf(" %s | %f | %f\n", tempHead->order->title, tempHead->order->price, tempHead->order->currBal);
+            if(strcmp(c->customerID, tempHead->order->customerID) == 0 && tempHead->order->success == 1)
+                printf(" %s | %f | %f\n", tempHead->order->title, tempHead->order->price, tempHead->order->currBal);
             tempHead = tempHead->next;
         }
-        
+        printf("### FAILED ORDERS ###\n");
+        tempHead = globalLL;
+        while(tempHead != NULL){
+            if(strcmp(c->customerID, tempHead->order->customerID) == 0 && tempHead->order->success == 0)
+                printf(" %s | %f | %f\n", tempHead->order->title, tempHead->order->price, tempHead->order->currBal);
+            tempHead = tempHead->next;
+        }
+        printf("=== END CUSTOMER INFO ===\n");
+
     }
     pthread_exit(0);
 }
@@ -133,7 +142,7 @@ void * consumer(void * arg)
     pthread_detach( pthread_self() );
     struct filePointer *data = (struct filePointer *)arg;
     struct Queue *queue = data->table;
-    fprintf(stderr, "-------------------------------about to go into the consumer in the thread %s\n", data->table->category);
+    //fprintf(stderr, "-------------------------------about to go into the consumer in the thread %s\n", data->table->category);
     struct QueueNode *temp;
     struct bookOrder *bo;
     while(queue->length > 0){
@@ -142,12 +151,12 @@ void * consumer(void * arg)
 
         struct customer *c = lookupCustomer(bo->customerID); 
         pthread_mutex_lock(&c->mutex);
-        fprintf(stderr, "cat: %s, title: %s, price: %f \n", bo->category, bo->title, bo->price);
+        //fprintf(stderr, "cat: %s, title: %s, price: %f \n", bo->category, bo->title, bo->price);
         if(c == NULL)
-            fprintf(stderr, "------------------null\n");
+            ;//fprintf(stderr, "------------------null\n");
         else {    
-            fprintf(stderr, "------------------not\n");
-            fprintf(stderr, "name: %s, balance: %f, cid: %s \n", c->name, c->balance, c->customerID);
+            //fprintf(stderr, "------------------not\n");
+            //fprintf(stderr, "name: %s, balance: %f, cid: %s \n", c->name, c->balance, c->customerID);
             int success = 0;
             if(c->balance >= bo->price){
                 c->balance -= bo->price;
@@ -160,23 +169,25 @@ void * consumer(void * arg)
             else {
                 listHead = c->failedHead;
             }
-            if(listHead == NULL){
+            listHead = globalLL;
+            if(globalLL == NULL){
                 struct llNode *tempNode = malloc(sizeof(struct llNode));
                 tempNode->order = bo;
                 tempNode->order->currBal = c->balance;
-                listHead = tempNode;
-                listHead->next = NULL;
+                tempNode->order->success = success;
+                globalLL = tempNode;
+                globalLL->next = NULL;
             }
             else { 
                 while(listHead->next != NULL){
-                    printf("iterating\n");
                     listHead = listHead->next;
                 } 
                 struct llNode *tempNode = malloc(sizeof(struct llNode));
                 tempNode->order = bo;
                 tempNode->order->currBal = c->balance;
+                tempNode->order->success = success;
                 listHead->next = tempNode; 
-                listHead->next = NULL;
+                tempNode->next = NULL;
             }
         }        
         pthread_mutex_unlock(&c->mutex);
@@ -188,7 +199,6 @@ void * consumer(void * arg)
 void * producer(void * arg)
 {
     pthread_detach( pthread_self() );
-    fprintf(stderr, "about to go into the producer\n");
     struct filePointer *fp = (struct filePointer *)arg;
     FILE *bookFile = fp->fp;
     char line[256];
@@ -218,7 +228,6 @@ void * producer(void * arg)
 
         struct Queue *queue = lookupQueue(order->category);
         enqueue(queue, node);
-        printf("%s enqueued\n", queue->category);
     }
     producerEmpty = 1;
     return 0;
