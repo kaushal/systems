@@ -121,14 +121,14 @@ int main(int argc, char * argv[])
         struct llNode *tempHead = globalLL;
         while(tempHead != NULL){
             if(strcmp(c->customerID, tempHead->order->customerID) == 0 && tempHead->order->success == 1)
-                printf(" %s | %f | %f\n", tempHead->order->title, tempHead->order->price, tempHead->order->currBal);
+                printf("%s | %f | %f\n", tempHead->order->title, tempHead->order->price, tempHead->order->currBal);
             tempHead = tempHead->next;
         }
         printf("### FAILED ORDERS ###\n");
         tempHead = globalLL;
         while(tempHead != NULL){
             if(strcmp(c->customerID, tempHead->order->customerID) == 0 && tempHead->order->success == 0)
-                printf(" %s | %f | %f\n", tempHead->order->title, tempHead->order->price, tempHead->order->currBal);
+                printf("%s | %f | %f\n", tempHead->order->title, tempHead->order->price, tempHead->order->currBal);
             tempHead = tempHead->next;
         }
         printf("=== END CUSTOMER INFO ===\n");
