@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "uthash.h"
+#include "tokenizer.h"
 #include "queue.h"
 
 struct filePointer {
@@ -11,29 +12,43 @@ struct filePointer {
     struct Queue *table;
 };
 
+struct llNode {
+    struct llNode *next;
+    struct bookOrder *order;
+};
+
 struct customer {
     char * name;
-    int customerID;         /* key */
+    char * customerID;         /* key */
     double balance;
     char * address;
     char * state;
     char * areaCode;
+    struct llNode *head;
+    struct llNode *successHead;
+    struct llNode *failedHead;
+    pthread_mutex_t mutex;
     UT_hash_handle hh;
 };
 
 struct bookOrder {
     char * title;
     double price;
-    int customerID;
+    char * customerID;
     char * category;
+    double currBal;
+    int success;
 };
 
+struct llNode *globalLL = NULL;
 /*Global Hash Tables*/
+int consumerThreadCount = 0;
 struct customer *customersHashTable = NULL;
 struct Queue *queueHashTable = NULL;
 
 /*Method Declarations*/
 void * consumer(void * arg);
+struct customer * lookupCustomer(char * customerID);
 struct customer * makeCustomer(char *line);
 void addCustomer(struct customer *cInfo);
 char ** processCategories(char * categories);
@@ -65,14 +80,14 @@ int main(int argc, char * argv[])
     while(fgets(line, sizeof(line), dbFile)) {
         struct customer *newCustomer =  makeCustomer(line);
         addCustomer(newCustomer);
+        struct customer *tempCustomer;
+        HASH_FIND_STR(customersHashTable, newCustomer->customerID, tempCustomer);
     }
     /* Process Categories */
     while(fgets(line, sizeof(line), categoriesFile)) {
         struct Queue *queue = makeQueue();
         line[strlen(line) - 1] = '\0';
         char *newString = strdup(line);
-        fprintf(stderr, "%d\n", strlen(newString));
-        fprintf(stderr, "------%s-------\n", newString);
         queue->category = newString;
 
         HASH_ADD_KEYPTR(hh, queueHashTable, queue->category, strlen(queue->category), queue);  /* Arguments: Hash Table, key, value*/
@@ -84,106 +99,174 @@ int main(int argc, char * argv[])
     struct Queue *s;
 
     pthread_create(&ignore, 0, producer, fp);
-
+    int threadCount = 0;
     for(s=queueHashTable; s != NULL; s=s->hh.next) {
+        while(producerEmpty == 0){;}
         struct filePointer *data = malloc(sizeof(struct filePointer));
         data->table = s;
         if(s->category == NULL)
             continue;
-        fprintf(stderr, "thread name: %s\n", data->table->category);
         pthread_create(&ignore, 0, consumer, data);
+        threadCount++;
+    }
+    struct customer *c;
+    while(consumerThreadCount != threadCount){;}
+    for(c=customersHashTable; c != NULL; c=c->hh.next) {
+        printf("\n=== BEGIN CUSTOMER INFO ===\n");
+        printf("### BALANCE ###\n");
+        printf("Customer Name: %s\n", c->name);
+        printf("Customer ID: %s\n", c->customerID);
+        printf("Remaining credit balance after all purchases (a dollar amount): $%f\n", c->balance);
+        printf("### SUCCESSFUL ORDERS ###\n");
+        struct llNode *tempHead = globalLL;
+        while(tempHead != NULL){
+            if(strcmp(c->customerID, tempHead->order->customerID) == 0 && tempHead->order->success == 1)
+                printf("%s | %f | %f\n", tempHead->order->title, tempHead->order->price, tempHead->order->currBal);
+            tempHead = tempHead->next;
+        }
+        printf("### FAILED ORDERS ###\n");
+        tempHead = globalLL;
+        while(tempHead != NULL){
+            if(strcmp(c->customerID, tempHead->order->customerID) == 0 && tempHead->order->success == 0)
+                printf("%s | %f | %f\n", tempHead->order->title, tempHead->order->price, tempHead->order->currBal);
+            tempHead = tempHead->next;
+        }
+        printf("=== END CUSTOMER INFO ===\n");
+
     }
     pthread_exit(0);
-
 }
 
 void * consumer(void * arg)
 {
+    pthread_detach( pthread_self() );
     struct filePointer *data = (struct filePointer *)arg;
     struct Queue *queue = data->table;
-    fprintf(stderr, "about to go into the consumer in the thread %s\n", data->table->category);
-    while(1){
-        pthread_detach( pthread_self() );
-        fprintf(stderr, "%s: looping\n", data->table->category);
+    //fprintf(stderr, "-------------------------------about to go into the consumer in the thread %s\n", data->table->category);
+    struct QueueNode *temp;
+    struct bookOrder *bo;
+    while(queue->length > 0){
+        temp = (struct QueueNode*)dequeue(queue);
+        bo = (struct bookOrder *)temp->data;
 
-        pthread_mutex_lock(&queue->mutex);
-        if(queue->length == 0 && producerEmpty == 0){
-            fprintf(stderr, "%s: waiting\n", data->table->category);
-            pthread_cond_wait(&queue->dataAvailable, &queue->mutex);
-            fprintf(stderr, "%s: stopped waiting\n", data->table->category);
-        }
-        else if(producerEmpty != 0){
-            return 0;
-        }
-        struct QueueNode *head = dequeue(queue);
-        struct bookOrder *order = head->data;
-        fprintf(stderr, "----bullshit------");
-        printf("GAHHHHHH: %s\n", head->data);
-        /*printf("%s\n",head->);*/
-        pthread_mutex_unlock(&queue->mutex);
+        struct customer *c = lookupCustomer(bo->customerID); 
+        pthread_mutex_lock(&c->mutex);
+        //fprintf(stderr, "cat: %s, title: %s, price: %f \n", bo->category, bo->title, bo->price);
+        if(c == NULL)
+            ;//fprintf(stderr, "------------------null\n");
+        else {    
+            //fprintf(stderr, "------------------not\n");
+            //fprintf(stderr, "name: %s, balance: %f, cid: %s \n", c->name, c->balance, c->customerID);
+            int success = 0;
+            if(c->balance >= bo->price){
+                c->balance -= bo->price;
+                success = 1;
+            }
+            struct llNode *listHead;
+            if(success){
+                listHead = c->successHead;
+            }
+            else {
+                listHead = c->failedHead;
+            }
+            listHead = globalLL;
+            if(globalLL == NULL){
+                struct llNode *tempNode = malloc(sizeof(struct llNode));
+                tempNode->order = bo;
+                tempNode->order->currBal = c->balance;
+                tempNode->order->success = success;
+                globalLL = tempNode;
+                globalLL->next = NULL;
+            }
+            else { 
+                while(listHead->next != NULL){
+                    listHead = listHead->next;
+                } 
+                struct llNode *tempNode = malloc(sizeof(struct llNode));
+                tempNode->order = bo;
+                tempNode->order->currBal = c->balance;
+                tempNode->order->success = success;
+                listHead->next = tempNode; 
+                tempNode->next = NULL;
+            }
+        }        
+        pthread_mutex_unlock(&c->mutex);
     }
+    consumerThreadCount++;
     return 0;
 }
 
 void * producer(void * arg)
 {
     pthread_detach( pthread_self() );
-    fprintf(stderr, "about to go into the producer\n");
     struct filePointer *fp = (struct filePointer *)arg;
     FILE *bookFile = fp->fp;
     char line[256];
     while(fgets(line, sizeof(line), bookFile)) {
         struct bookOrder *order = malloc(sizeof(struct bookOrder));
         struct QueueNode *node = malloc(sizeof(struct QueueNode));
-        char * token = strtok(line, "|");
-        order->title = token;
-        token = strtok(NULL, "|");
-        order->price = atof(token);
-        token = strtok(NULL, "|");
-        order->customerID = atoi(token);
-        token = strtok(NULL, "|");
-        token[strlen(token) - 1] = '\0';
-        order->category= token;
+        TokenizerT *tokenizer = TKCreate("|", line);
+
+        //title
+        char * tok = TKGetNextToken(tokenizer);
+        order->title = tok;
+
+        //price
+        tok = TKGetNextToken(tokenizer);
+        order->price = atof(tok);
+
+        //customerID
+        tok = TKGetNextToken(tokenizer);
+        order->customerID = tok;
+
+        //category
+        tok = TKGetNextToken(tokenizer);
+        order->category = tok;
+        tok[strlen(tok)-1] = '\0';
 
         node->data = order;
 
-        fprintf(stderr, "%s\n", order->category);
         struct Queue *queue = lookupQueue(order->category);
-        pthread_mutex_lock(&queue->mutex);
         enqueue(queue, node);
-        pthread_mutex_unlock(&queue->mutex);
-        printf("%s enqueued\n", queue->category);
-        if(queue->length == 1){
-            pthread_cond_signal(&queue->dataAvailable);
-        }
     }
     producerEmpty = 1;
     return 0;
 }
 
 
-
-
 struct customer * makeCustomer(char *line)
 {
     struct customer *c = malloc(sizeof(struct customer));
+    TokenizerT *tokenizer = TKCreate("|", line);
 
-    char * token = strtok(line, "|");
+    /*name*/
+    char * token = TKGetNextToken(tokenizer);
     c->name = token;
-    token = strtok(NULL, "|");
-    c->customerID = atoi(token);
-    token = strtok(NULL, "|");
+    /*customerID*/
+    token = TKGetNextToken(tokenizer);
+    c->customerID = token;
+    /*balance*/
+    token = TKGetNextToken(tokenizer);
+    c->balance= atof(token);
+    /*address*/
+    token = TKGetNextToken(tokenizer);
     c->address = token;
-    token = strtok(NULL, "|");
+    /*state*/
+    token = TKGetNextToken(tokenizer);
     c->state = token;
-    token = strtok(NULL, "|");
+    /*areaCode*/
+    token = TKGetNextToken(tokenizer);
     c->areaCode = token;
+
+    c->successHead = NULL;
+    c->failedHead = NULL;
+
     return c;
 }
 
 void addCustomer(struct customer *cInfo)
 {
-    HASH_ADD_INT(customersHashTable, customerID, cInfo );  /* Arguments: Hash Table, key, value*/
+    HASH_ADD_KEYPTR(hh, customersHashTable, cInfo->customerID, strlen(cInfo->customerID), cInfo);  /* Arguments: Hash Table, key, value*/
 }
 
 struct customer * lookupCustomer(char * customerID)

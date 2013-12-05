@@ -6,7 +6,6 @@
 struct Queue *makeQueue()
 {
     struct Queue *queue = malloc(sizeof(struct Queue));
-    queue->isOpen = 1;
     queue->category = NULL;
     queue->length = 0;
     queue->head = NULL;
@@ -36,12 +35,15 @@ void enqueue(struct Queue *queue, struct QueueNode *data)
 
 void *dequeue(struct Queue *queue)
 {
+    if(queue->length == 0){
+        return NULL;
+    }
     char * data = queue->head->data;
     struct QueueNode *head = queue->head;
     if(queue->length != 1) {
         queue->head = queue->head->next;
     }
-    free(head);
+
     queue->length--;
     return data;
 }
