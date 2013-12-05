@@ -65,6 +65,8 @@ void myFree(char *data){
     tempNode = masterList;
 
     //isolates the block of memory in the masterList
+    if(tempNode->startPos == startPos)
+        currNode = tempNode;
     while(tempNode->next != NULL){
         if(tempNode->startPos == startPos){
             currNode = tempNode;
@@ -84,14 +86,16 @@ void myFree(char *data){
     //moves all the startPos values over by the currNode->size and gets rid of the one we want to
     if(tempNode->startPos == currNode->startPos)
         tempNode = tempNode->next;
-    while(tempNode->next != NULL){
-        if(tempNode->startPos == currNode->startPos)
-            previousNode->next = tempNode->next;
-        if(tempNode->startPos > currNode->startPos + currNode->size){
-            tempNode->startPos -= currNode->size;
+    if(tempNode != NULL){
+        while(tempNode->next != NULL){
+            if(tempNode->startPos == currNode->startPos)
+                previousNode->next = tempNode->next;
+            if(tempNode->startPos > currNode->startPos + currNode->size){
+                tempNode->startPos -= currNode->size;
+            }
+            previousNode = tempNode;
+            tempNode = tempNode->next;
         }
-        previousNode = tempNode;
-        tempNode = tempNode->next;
     }
 }
 
