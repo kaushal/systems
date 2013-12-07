@@ -1,27 +1,28 @@
 #include<stdlib.h>
 #include<stdio.h>
 
+#define MEM_SIZE 50
+
 struct memNode {
     int startPos;
     int size;
     struct memNode *next;
 };
 
-int memSize = 50;
-char *mem[50]; //5000 long char*, that represents all of the memory
+char *mem[MEM_SIZE]; //5000 long char*, that represents all of the memory
 struct memNode *masterList; //list that maps out the char*
 
-char *myMalloc(int bits){
+char *myMalloc(size_t bits){
     struct memNode *temp = masterList;
-    //if the memory is empty, nothing malloced yet, or just freed
+    //if the memory is empty, nothing malloc'd yet, or just freed
     if(masterList == NULL){
         struct memNode *newNode = malloc(sizeof(struct memNode));
         newNode->startPos = 0;
-        if(bits > memSize) {
+        if(bits > MEM_SIZE) {
             printf("Trying to allocate more than memory size.\n");
             return NULL;
         }
-        newNode->size= bits;
+        newNode->size = bits;
         masterList = newNode;
         newNode->next = NULL;
         return mem[0];
@@ -30,7 +31,8 @@ char *myMalloc(int bits){
     while(temp->next != NULL){
         temp = temp->next;
     }
-    if(memSize - (temp->startPos + temp->size) >= bits){
+    //Requested block fits in memory
+    if(MEM_SIZE - (temp->startPos + temp->size) >= bits){
         struct memNode *newNode = malloc(sizeof(struct memNode));
         newNode->startPos = temp->startPos + temp->size + 1;
         temp->next = newNode;
@@ -43,12 +45,12 @@ char *myMalloc(int bits){
     }
 }
 
-void myFree(char *data){
+void myFree(void *data){
     int startPos = -1, i, tempPos;
     struct memNode *tempNode, *currNode, *previousNode;
 
     //finds the starting position in mem
-    for(i = 0; i < memSize; i++){
+    for(i = 0; i < MEM_SIZE; i++){
         if(mem[i] == data){
             startPos = i;
             break;
@@ -76,7 +78,7 @@ void myFree(char *data){
     }
 
     //shifts all of the memory over by the block size that we just found
-    for(i = currNode->startPos + currNode->size; i < memSize; i++){
+    for(i = currNode->startPos + currNode->size; i < MEM_SIZE; i++){
         mem[tempPos] = mem[i];
         tempPos++;
     }
