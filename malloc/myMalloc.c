@@ -7,8 +7,8 @@ struct memNode {
     struct memNode *next;
 };
 
-int memSize = 50;
-char *mem[50]; //5000 long char*, that represents all of the memory
+int memSize = 5000;
+char *mem[5000]; //5000 long char*, that represents all of the memory
 struct memNode *masterList; //list that maps out the char*
 
 char *myMalloc(int bits){
@@ -104,10 +104,10 @@ int main() {
     int i = 0;
 
 
-    char *p = myMalloc(100);
-    char *p2 = myMalloc(10);
-    myFree(p2);
+    char *p = myMalloc(10);
+    char *p2 = myMalloc(1000);
     myFree(p);
+    myFree(p2);
 
 
     return 0;
