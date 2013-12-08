@@ -11,5 +11,5 @@ myMalloc.o: myMalloc.c
 	$(CC) $(CFLAGS) -c myMalloc.c
 
 clean:
-	-rm -rf *.o myMalloc *.dSYM
+	-rm -rf *.o *.out myMalloc *.dSYM
 
