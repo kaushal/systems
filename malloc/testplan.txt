@@ -1,0 +1,20 @@
+The way to test our implementation of malloc and free is by running our program followed by a number, "./myMalloc [1-6]"
+This number represents a different case that we are testing. All the cases are outlined below:
+
+1:
+The first case makes two calls to myMalloc and two to myFree. We attempt to malloc 4000 bits followed by 1000 bits. This should be allowed. Then we proceed to free both of the allocated pointers.
+
+2:
+The second case also makes two calls to myMalloc and two to myFree. We attempt to allocate 4000 bits followed by 1001 bits. This should cause a "not enough space" error to be printed, and the malloc of p2 will fail.
+
+3:
+The third case attempts to free memory that has not been allocated. X is declared imperatively and never malloc'd, yet still freed. This raises an error.
+
+4:
+This case frees a pointer to dynamic memory that was not returned from malloc.
+
+5:
+This case mallocs then frees a pointer twice.  This results in an error.
+
+6:
+This case mallocs,frees, mallocs, and frees again. It operates normally even if malloc returned the same pointer in both instances.
