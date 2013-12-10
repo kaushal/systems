@@ -16,8 +16,8 @@ struct MemEntry{
 void *my_malloc( unsigned int size , const char *file, const unsigned long line);
 void my_free( void * p , const char *file, const unsigned long line);
 
-#define malloc( x ) my_malloc( x, __FILE__ , __LINE__ )
-#define free( x ) my_free( x, __FILE__ , __LINE__ )
+#define malloc( x ) my_malloc( x, __FILE__ , __LINE__ );
+#define free( x ) my_free( x, __FILE__ , __LINE__ );
 
 
 

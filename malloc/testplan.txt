@@ -5,7 +5,7 @@ This number represents a different case that we are testing. All the cases are o
 The first case makes two calls to myMalloc and two to myFree. We attempt to malloc 4000 bits followed by 1000 bits. This should be allowed. Then we proceed to free both of the allocated pointers.
 
 2:
-The second case also makes two calls to myMalloc and two to myFree. We attempt to allocate 4000 bits followed by 1001 bits. This should cause a "not enough space" error to be printed, and the malloc of p2 will fail.
+The second case also makes two calls to myMalloc and two to myFree. We attempt to allocate 4000 bits followed by 1001 bits. This should be valid because we use sbrek.
 
 3:
 The third case attempts to free memory that has not been allocated. X is declared imperatively and never malloc'd, yet still freed. This raises an error.
